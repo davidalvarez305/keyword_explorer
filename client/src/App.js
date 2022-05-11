@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 
 function App() {
-  const navigate = useNavigate();
   function getToken() {
     fetch("http://localhost:4010/api/keywords/")
       .then(async (res) => {

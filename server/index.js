@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";
 import { PORT } from "./constants.js";
 import KeywordsController from "./controllers/keywords.js";
+import AuthController from "./controllers/auth.js";
 
 const index = async () => {
 
@@ -18,7 +19,8 @@ const index = async () => {
   );
 
   // API Routes
-  app.use("/api/", KeywordsController);
+  app.use("/api/keywords", KeywordsController);
+  app.use("/api/auth", AuthController);
 
   // Start Express
   app.listen(PORT, () => {
