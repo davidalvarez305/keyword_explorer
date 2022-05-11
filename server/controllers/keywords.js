@@ -11,7 +11,7 @@ import {
 const router = express.Router();
 
 // Get Keywords From URL
-router.post("/", GetAllKeywordsFromUrl);
+router.get("/keywords", GetAllKeywordsFromUrl);
 
 // Get 1 Keyword's "People Also Ask" Questions
 router.get("/questions/:keyword", GetPeopleAlsoAskQuestions);
