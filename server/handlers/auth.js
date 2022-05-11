@@ -1,7 +1,7 @@
 import { RequestAuthToken } from "../actions/auth.js";
 
 export const RequestAuthToken = (req, res) => {
-  RequestAuthToken()
+  RequestAuthToken(req.body.scope)
     .then((token) => {
       return res.status(200).json({ data: token });
     })
@@ -11,7 +11,7 @@ export const RequestAuthToken = (req, res) => {
 };
 
 export const RequestAccessToken = async (req, res) => {
-  GetAccessToken(req.code)
+  GetAccessToken(req.body)
     .then((data) => {
       return res.status(200).json({ data });
     })

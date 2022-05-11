@@ -6,10 +6,11 @@ export default function OAuth2() {
   let [searchParams] = useSearchParams();
   useEffect(() => {
     setCode(searchParams);
-    fetch("http://localhost:4010/api/auth/request", {
+    fetch("http://localhost:4010/api/auth/token", {
       method: "POST",
       body: JSON.stringify({
-        code,
+        code: code,
+        scope: `https://www.googleapis.com/auth/adwords`,
       }),
       headers: { "Content-Type": "application/json" },
     });
