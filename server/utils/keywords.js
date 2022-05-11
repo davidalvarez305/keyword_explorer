@@ -1,16 +1,16 @@
 import axios from "axios";
 import * as config from "../google.json";
-import { GOOGLE_REFRESH_TOKEN, GOOGLE_ADS_SCOPE, __prod__, REDIRECT_URI } from "../../utils/constants.js";
+import { GOOGLE_REFRESH_TOKEN, GOOGLE_ADS_SCOPE, __prod__, REDIRECT_URI } from "../constants.js";
 
 export const RequestAuthToken = () => {
   return new Promise((resolve, reject) => {
     axios
-      .post(config.web.auth_uri, null, {
+      .post(config.default.web.auth_uri, null, {
         params: {
           access_type: "offline",
           approval_prompt: "force",
           scope: GOOGLE_ADS_SCOPE,
-          client_id: config.web.oauth_client_id,
+          client_id: config.default.web.client_id,
           redirect_uri: REDIRECT_URI,
           response_type: "code",
         },
@@ -25,10 +25,10 @@ export const RequestAuthToken = () => {
 export const RefreshGoogleToken = () => {
   return new Promise((resolve, reject) => {
     axios
-      .post(config.web.token_uri, null, {
+      .post(config.default.web.token_uri, null, {
         params: {
-          client_secret: config.web.oauth_client_secret,
-          client_id: config.web.oauth_client_id,
+          client_secret: config.default.web.oauth_client_secret,
+          client_id: config.default.web.client_id,
           refresh_token: GOOGLE_REFRESH_TOKEN,
           grant_type: "refresh_token",
         },
@@ -49,14 +49,14 @@ export const RefreshGoogleToken = () => {
 export const GetAccessToken = async (code) => {
   return new Promise((resolve, reject) => {
     axios
-      .post(config.web.token_uri, null, {
+      .post(config.default.web.token_uri, null, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         params: {
           code: code,
-          client_id: config.web.oauth_client_id,
-          client_secret: config.web.oauth_client_secret,
+          client_id: config.default.web.client_id,
+          client_secret: config.default.web.oauth_client_secret,
           redirect_uri: REDIRECT_URI,
           scope: GOOGLE_ADS_SCOPE,
           grant_type: "authorization_code",
