@@ -2,7 +2,7 @@ import "dotenv/config"
 import express from "express";
 import cors from "cors";
 import { PORT } from "./constants.js";
-import { KeywordsController } from "./controllers/keywords.js";
+import KeywordsController from "./controllers/keywords.js";
 
 const index = async () => {
 
