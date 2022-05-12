@@ -102,20 +102,21 @@ export const LogoutUser = async (req, res) => {
 };
 
 export const findUserById = async (id) => {
-  try {
-    const existingUser = await getConnection().query(
-      `SELECT id, username FROM manager WHERE id = ${id}`
-    );
-    if (existingUser.length > 0) {
-      return {
-        user: existingUser[0],
-      };
-    } else {
-      return {
-        error: "User not found.",
-      };
-    }
-  } catch (error) {
-    throw new Error(error.message);
-  }
+  return new Promise((resolve, reject) => {
+    getConnection().query(
+        `SELECT id, username FROM manager WHERE id = ${id}`
+      ).then((existingUser) => {
+        if (existingUser.length > 0) {
+            resolve({
+                user: existingUser[0],
+              });
+          } else {
+            resolve({
+                error: "User not found.",
+              });
+          }
+      }).catch((err) => {
+        reject(err.message);
+    })
+  })
 };
