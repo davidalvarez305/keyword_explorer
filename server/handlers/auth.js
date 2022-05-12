@@ -1,7 +1,7 @@
-import { RequestAuthToken } from "../actions/auth.js";
+import { GetAuthToken } from "../actions/auth.js";
 
 export const RequestAuthToken = (req, res) => {
-  RequestAuthToken(req.body.scope)
+    GetAuthToken(req.body.scope)
     .then((token) => {
       return res.status(200).json({ data: token });
     })

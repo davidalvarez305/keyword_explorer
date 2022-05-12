@@ -1,8 +1,8 @@
 import axios from "axios";
 import * as config from "../google.json";
-import { GOOGLE_REFRESH_TOKEN, GOOGLE_ADS_SCOPE, __prod__, REDIRECT_URI } from "../constants.js";
+import { __prod__, REDIRECT_URI } from "../constants.js";
 
-export const RequestAuthToken = (scope) => {
+export const GetAuthToken = (scope) => {
   return new Promise((resolve, reject) => {
     axios
       .post(config.default.web.auth_uri, null, {
