@@ -39,13 +39,13 @@ export const Login = async (req, res) => {
 
 export const Register = async (req, res) => {
   RegisterUser(req.body)
-    .then((registerUser) => {
-      if (registerUser.user) {
-        req.session.userId = registerUser.user.id;
-        const { user } = registerUser;
+    .then((registeredUser) => {
+      if (registeredUser.user) {
+        req.session.userId = registeredUser.user.id;
+        const { user } = registeredUser;
         return res.status(201).json({ data: { user } });
       } else {
-        const { error } = registerUser;
+        const { error } = registeredUser;
         return res.status(400).json({ data: { error } });
       }
     })
@@ -57,7 +57,7 @@ export const Register = async (req, res) => {
 export const Logout = async (req, res) => {
   if (req.session.userId) {
     await LogoutUser(req, res)
-      .then((response) => {
+      .then((_) => {
         return res.status(200).json({ data: true });
       })
       .catch((error) => {
@@ -69,6 +69,7 @@ export const Logout = async (req, res) => {
 };
 
 export const Me = async (req, res) => {
+  console.log(req.session.userId)
   if (req.session.userId) {
     findUserById(req.session.userId)
       .then((foundUser) => {
@@ -81,6 +82,7 @@ export const Me = async (req, res) => {
         }
       })
       .catch((error) => {
+        console.error(error)
         return res.status(500).json({ data: error.message });
       });
   } else {

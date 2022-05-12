@@ -2,17 +2,18 @@ import typeorm from "typeorm";
 const getConnection = typeorm.getConnection;
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants.js";
+import { AppDataSource } from "../database/db.js";
+import { UserColumns } from "../models/user.js";
+
+const User = AppDataSource.getRepository(UserColumns);
 
 export const GetUser = async (username) => {
   return new Promise((resolve, reject) => {
-    getConnection()
-      .query(
-        `SELECT username, email FROM manager WHERE username = '${username}'`
-      )
+    User.findOneBy({ username: username })
       .then((user) => {
-        if (user.length > 0) {
+        if (user) {
           resolve({
-            user: user[0],
+            user,
           });
         } else {
           resolve({
@@ -21,6 +22,7 @@ export const GetUser = async (username) => {
         }
       })
       .catch((err) => {
+        console.error(err);
         reject(err.message);
       });
   });
@@ -28,64 +30,89 @@ export const GetUser = async (username) => {
 
 export const LoginUser = async (body) => {
   return new Promise((resolve, reject) => {
-    getConnection().query(
-        `SELECT * FROM manager WHERE username = '${body.username}'`
-      ).then((user) => {
-        if (user.length > 0) {
-            const valid = await argon2.verify(user[0].password, body.password);
-            if (valid) {
-                resolve({
-                user: user[0],
-              });
-            } else {
-              resolve({
-                error: "Incorrect password.",
-              });
-            }
+    User.findOneBy({ username: body.username })
+      .then(async (user) => {
+        if (user) {
+          console.log(user);
+          const valid = await argon2.verify(user.password, body.password);
+          if (valid) {
+            resolve({
+              user: user,
+            });
           } else {
             resolve({
-                error: "Username not found.",
-              });
+              error: "Incorrect password.",
+            });
           }
-      }).catch((err) => {
-          reject(err.message);
+        } else {
+          resolve({
+            error: "Username not found.",
+          });
+        }
       })
-  })
+      .catch((err) => {
+        console.error(err);
+        reject(err.message);
+      });
+  });
 };
 
 export const RegisterUser = async (body) => {
-  try {
-    const existingUsername = await getConnection().query(
-      `SELECT * FROM manager WHERE username = '${body.username}'`
-    );
-    if (existingUsername.length > 0) {
-      return {
-        error: "Username already taken.",
-      };
-    }
-    const existingEmail = await getConnection().query(
-      `SELECT * FROM manager WHERE email = '${body.email}'`
-    );
-    if (existingEmail.length > 0) {
-      return {
-        error: "Email already taken.",
-      };
-    }
-    const hashedPassword = await argon2.hash(body.password);
-    await getConnection().query(
-      `INSERT INTO manager (username, email, password) VALUES ('${body.username}', '${body.email}', '${hashedPassword}');
-      `
-    );
-    const user = await getConnection().query(
-      `SELECT * FROM manager WHERE username = '${body.username}';
-        `
-    );
-    return {
-      user: user[0],
-    };
-  } catch (error) {
-    throw new Error(error.message);
-  }
+  return new Promise((resolve, reject) => {
+    // Check for existing username
+    User.findOneBy({ username: body.username })
+      .then((existingUsername) => {
+        if (existingUsername) {
+          resolve({
+            error: "Username already taken.",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject(err.message);
+      });
+
+    // Check for existing e-mail
+    User.findOneBy({ email: body.email })
+      .then((existingEmail) => {
+        if (existingEmail) {
+          resolve({
+            error: "Email already taken.",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject(err.message);
+      });
+
+    // Hash password and create User
+    argon2
+      .hash(body.password)
+      .then((hashedPassword) => {
+        if (hashedPassword) {
+          let newUser = {
+            ...body,
+            password: hashedPassword,
+          };
+          User.save(newUser)
+            .then((user) => {
+              resolve({
+                user,
+              });
+            })
+            .catch((err) => {
+              console.error(err);
+              reject(err.message);
+            });
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        reject(err.message);
+      });
+  });
 };
 
 export const LogoutUser = async (req, res) => {
@@ -103,20 +130,15 @@ export const LogoutUser = async (req, res) => {
 
 export const findUserById = async (id) => {
   return new Promise((resolve, reject) => {
-    getConnection().query(
-        `SELECT id, username FROM manager WHERE id = ${id}`
-      ).then((existingUser) => {
-        if (existingUser.length > 0) {
-            resolve({
-                user: existingUser[0],
-              });
-          } else {
-            resolve({
-                error: "User not found.",
-              });
-          }
-      }).catch((err) => {
+    User.findOneBy({ id })
+      .then((user) => {
+        resolve({
+          user,
+        });
+      })
+      .catch((err) => {
+        console.error(err);
         reject(err.message);
-    })
-  })
+      });
+  });
 };
