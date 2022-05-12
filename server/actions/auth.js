@@ -32,19 +32,21 @@ export const GetAccessToken = async (body) => {
         params: {
           code: body.code,
           client_id: config.default.web.client_id,
-          client_secret: config.default.web.oauth_client_secret,
+          client_secret: config.default.web.client_secret,
           redirect_uri: REDIRECT_URI,
           scope: body.scope,
           grant_type: "authorization_code",
         },
       })
       .then((data) => {
+        console.log(data.data);
         resolve(data.data);
       })
       .catch((e) => {
         if (__prod__) {
           reject(e.message);
         } else {
+          console.log(e);
           reject(e);
         }
       });

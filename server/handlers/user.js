@@ -69,7 +69,6 @@ export const Logout = async (req, res) => {
 };
 
 export const Me = async (req, res) => {
-  console.log(req.session.userId)
   if (req.session.userId) {
     findUserById(req.session.userId)
       .then((foundUser) => {

@@ -1,4 +1,4 @@
-import { GetAuthToken } from "../actions/auth.js";
+import { GetAuthToken, GetAccessToken, RefreshGoogleToken } from "../actions/auth.js";
 
 export const RequestAuthToken = (req, res) => {
     GetAuthToken(req.body.scope)
@@ -13,6 +13,7 @@ export const RequestAuthToken = (req, res) => {
 export const RequestAccessToken = async (req, res) => {
   GetAccessToken(req.body)
     .then((data) => {
+      req.session.token = data.refresh_token
       return res.status(200).json({ data });
     })
     .catch((err) => {
