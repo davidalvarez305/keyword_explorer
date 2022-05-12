@@ -46,7 +46,6 @@ export const GetAccessToken = async (body) => {
         if (__prod__) {
           reject(e.message);
         } else {
-          console.log(e);
           reject(e);
         }
       });
@@ -65,6 +64,9 @@ export const RefreshGoogleToken = () => {
         },
       })
       .then((data) => {
+        // Add logic for appending a temprary access token to the user which will be used for requests.
+        // Create logic for whenever user requests fail because of access token to refresh
+        // Automatically detect if it's been more than 1 hour.
         resolve(data.data);
       })
       .catch((e) => {
