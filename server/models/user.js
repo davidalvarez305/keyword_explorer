@@ -28,5 +28,11 @@ export const UserColumns = new EntitySchema({
       unique: true,
       type: "varchar",
     },
+    refresh_token: {
+      unique: true,
+      type: "varchar",
+      nullable: true,
+      default: null,
+    },
   },
 });

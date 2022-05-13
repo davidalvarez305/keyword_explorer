@@ -15,7 +15,7 @@ export default function OAuth2() {
         method: "POST",
         body: JSON.stringify({
           code: code,
-          scope: `https://www.googleapis.com/auth/adwords`,
+          scope: 'https://www.googleapis.com/auth/webmasters.readonly',
         }),
         headers: { "Content-Type": "application/json" },
       });

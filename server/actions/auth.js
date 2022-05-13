@@ -1,6 +1,10 @@
 import axios from "axios";
 import * as config from "../google.json";
 import { __prod__, REDIRECT_URI } from "../constants.js";
+import { AppDataSource } from "../database/db.js";
+import { UserColumns } from "../models/user.js";
+
+const User = AppDataSource.getRepository(UserColumns);
 
 export const GetAuthToken = (scope) => {
   return new Promise((resolve, reject) => {
@@ -39,6 +43,22 @@ export const GetAccessToken = async (body) => {
         },
       })
       .then((data) => {
+        console.log(req.session)
+        // Persist data to Cookie
+        req.session.refresh_token = data.data.refresh_token;
+        req.session.access_token = data.data.access_token;
+        req.session.lastRequest = Date.now();
+
+        // Persist data to Database
+        User.findOneBy({ id: req.session.userId })
+          .then((u) => {
+            u.refresh_token = data.data.refresh_token;
+            u.save();
+          })
+          .catch((err) => {
+            console.error("Failed to persist refresh token to user database.");
+            reject(err);
+          });
         resolve(data.data);
       })
       .catch((e) => {
