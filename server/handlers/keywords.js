@@ -1,4 +1,5 @@
 export const GetAllKeywordsFromUrl = async (req, res) => {
+  console.log(req.session.token)
   return res.status(200).json({ data: "hey there!" });
 };
 

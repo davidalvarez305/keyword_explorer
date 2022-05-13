@@ -39,7 +39,6 @@ export const GetAccessToken = async (body) => {
         },
       })
       .then((data) => {
-        console.log(data.data);
         resolve(data.data);
       })
       .catch((e) => {
