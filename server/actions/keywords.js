@@ -38,7 +38,7 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
   });
 };
 
-export const GetStrikingDistanceTerms = async ({
+export const GetKeywordsFromURL = async ({
   site,
   accessToken,
   page,
@@ -61,38 +61,50 @@ export const GetStrikingDistanceTerms = async ({
       startDate: startDate ? startDate : minus30Days,
       endDate: endDate ? endDate : today,
       dimensions: ["query"],
+      dimensionFilterGroups: [
+        {
+          filters: [
+            {
+              dimension: "PAGE",
+              expression: page,
+              operator: "CONTAINS",
+            },
+          ],
+        },
+      ],
     },
   };
-
-  if (page) {
-    requestParams.data.dimensionFilterGroups = [
-      {
-        filters: [
-          {
-            dimension: "PAGE",
-            expression: page,
-            operator: "CONTAINS",
-          },
-        ],
-      },
-    ];
-  }
-
-  let strikingDistanceKeywords = [];
 
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       axios(requestParams)
         .then((data) => {
-          strikingDistanceKeywords = [
-            ...FilterStrikingDistanceKeywords(data.data.rows),
-          ];
-          resolve(strikingDistanceKeywords);
+          resolve(data.data.rows);
         })
         .catch((err) => {
           reject(err);
         });
     }, 1000);
+  });
+};
+
+export const GetStrikingDistanceTerms = async ({
+  site,
+  accessToken,
+  page,
+  startDate,
+  endDate,
+}) => {
+  return new Promise((resolve, reject) => {
+    GetKeywordsFromURL({ site, accessToken, page, startDate, endDate })
+      .then((keywords) => {
+        let strikingDistanceKeywords = [];
+        strikingDistanceKeywords = [
+          ...FilterStrikingDistanceKeywords(keywords),
+        ];
+        resolve(strikingDistanceKeywords);
+      })
+      .catch(reject);
   });
 };
 
@@ -148,7 +160,7 @@ export const GetPAAFromURL = async (body, accessToken) => {
         const extractedKeywords = await GetStrikingDistanceTerms(config);
         keywords = [...keywords, ...extractedKeywords];
       } catch (err) {
-        console.log(err.message)
+        console.log(err.message);
         reject(err);
       }
     }

@@ -85,14 +85,19 @@ export const GetStrikingDistanceKeywords = async (req, res) => {
   }
 
   const pagesToCrawl = req.body.pages.split("\n");
-
   let strikingDistanceKeywords = [];
+
   for (let i = 0; i < pagesToCrawl.length; i++) {
+    const config = {
+      site: extractSiteFromPage(pagesToCrawl[i]),
+      page: pagesToCrawl[i],
+      accessToken: req.session.access_token,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+    };
+
     try {
-      const keywords = await GetStrikingDistanceTerms(
-        pagesToCrawl[i],
-        req.session.access_token
-      );
+      const keywords = await GetStrikingDistanceTerms(config);
       strikingDistanceKeywords = [...strikingDistanceKeywords, ...keywords];
       return res.status(200).json({ data: strikingDistanceKeywords });
     } catch (err) {
