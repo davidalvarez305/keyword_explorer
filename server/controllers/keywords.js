@@ -16,10 +16,10 @@ const router = express.Router();
 router.post("/", googleAuth, GetAllKeywordsFromUrl);
 
 // Get 1 Keyword's "People Also Ask" Questions
-router.get("/questions/:keyword", googleAuth, GetPeopleAlsoAskQuestions);
+router.post("/questions", googleAuth, GetPeopleAlsoAskQuestions);
 
 // Get Many "People Also Ask" Questions From Many Keywords
-router.post("/questions", googleAuth, GetManyPAAQuestions);
+router.post("/many-questions", googleAuth, GetManyPAAQuestions);
 
 // Get "Low Pickings" Keywords From URL
 router.post("/low-pickings", googleAuth, GetLowPickingsKeywords);

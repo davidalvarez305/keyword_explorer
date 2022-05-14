@@ -1,5 +1,8 @@
 import axios from "axios";
-import { GetStrikingDistanceTerms } from "../actions/keywords.js";
+import {
+  CrawlGoogleSERP,
+  GetStrikingDistanceTerms,
+} from "../actions/keywords.js";
 
 export const GetAllKeywordsFromUrl = async (req, res) => {
   if (!req.body.site) {
@@ -32,7 +35,19 @@ export const GetAllKeywordsFromUrl = async (req, res) => {
 };
 
 export const GetPeopleAlsoAskQuestions = async (req, res) => {
-  return res.status(200).json({ data: "hey there!" });
+  if (!req.body.keyword) {
+    return res
+      .status(400)
+      .json({ data: "Please include a keyword in the request." });
+  }
+
+  CrawlGoogleSERP(req.body.keyword)
+    .then((data) => {
+      return res.status(200).json({ data });
+    })
+    .catch((err) => {
+      return res.status(400).json({ data: err.message });
+    });
 };
 
 export const GetManyPAAQuestions = async (req, res) => {
