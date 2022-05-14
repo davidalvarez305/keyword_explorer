@@ -4,6 +4,7 @@ import "dotenv/config";
 import {
   calculateDateDifference,
   extractQuestions,
+  extractSiteFromPage,
   FilterStrikingDistanceKeywords,
   getRandomIndex,
 } from "../utils/keywords.js";
@@ -37,10 +38,15 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
   });
 };
 
-export const GetStrikingDistanceTerms = async ({ site, accessToken, page, startDate, endDate }) => {
-
+export const GetStrikingDistanceTerms = async ({
+  site,
+  accessToken,
+  page,
+  startDate,
+  endDate,
+}) => {
   let currentDate = new Date();
-  const today = currentDate.toISOString().split("T")[0]
+  const today = currentDate.toISOString().split("T")[0];
   const minus30Days = calculateDateDifference(30);
 
   const requestParams = {
@@ -121,5 +127,42 @@ export const CrawlGoogleSERP = async (keyword) => {
     } catch (err) {
       reject(err);
     }
+  });
+};
+
+export const GetPAAFromURL = async (body, accessToken) => {
+  return new Promise(async (resolve, reject) => {
+    const pagesToCrawl = body.pages.split("\n");
+    let keywords = [];
+
+    for (let i = 0; i < pagesToCrawl.length; i++) {
+      const config = {
+        site: extractSiteFromPage(pagesToCrawl[i]),
+        page: pagesToCrawl[i],
+        accessToken: accessToken,
+        startDate: body.startDate,
+        endDate: body.endDate,
+      };
+
+      try {
+        const extractedKeywords = await GetStrikingDistanceTerms(config);
+        keywords = [...keywords, ...extractedKeywords];
+      } catch (err) {
+        console.log(err.message)
+        reject(err);
+      }
+    }
+
+    let peopleAlsoAskQuestions = [];
+    console.log(`Crawling ${keywords.length} striking distance keywords.`);
+    for (let i = 0; i < keywords.length; i++) {
+      try {
+        const questions = await CrawlGoogleSERP(keywords[i]);
+        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...questions];
+      } catch (err) {
+        reject(err);
+      }
+    }
+    resolve(peopleAlsoAskQuestions);
   });
 };
