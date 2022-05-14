@@ -38,7 +38,7 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
   });
 };
 
-export const GetKeywordsFromURL = async ({
+export const RequestKeywords = async ({
   site,
   accessToken,
   page,
@@ -96,7 +96,7 @@ export const GetStrikingDistanceTerms = async ({
   endDate,
 }) => {
   return new Promise((resolve, reject) => {
-    GetKeywordsFromURL({ site, accessToken, page, startDate, endDate })
+    RequestKeywords({ site, accessToken, page, startDate, endDate })
       .then((keywords) => {
         let strikingDistanceKeywords = [];
         strikingDistanceKeywords = [
