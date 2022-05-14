@@ -2,6 +2,7 @@ import axios from "axios";
 import axios2 from "axios-https-proxy-fix";
 import "dotenv/config";
 import {
+  calculateDateDifference,
   extractQuestions,
   FilterStrikingDistanceKeywords,
   getRandomIndex,
@@ -36,7 +37,12 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
   });
 };
 
-export const GetStrikingDistanceTerms = async (site, accessToken) => {
+export const GetStrikingDistanceTerms = async ({ site, accessToken, page, startDate, endDate }) => {
+
+  let currentDate = new Date();
+  const today = currentDate.toISOString().split("T")[0]
+  const minus30Days = calculateDateDifference(30);
+
   const requestParams = {
     url: `https://searchconsole.googleapis.com/webmasters/v3/sites/https%3A%2F%2F${site}/searchAnalytics/query?key=${process.env.API_KEY}`,
     method: "POST",
@@ -46,11 +52,25 @@ export const GetStrikingDistanceTerms = async (site, accessToken) => {
       Accept: "application/json",
     },
     data: {
-      startDate: "2022-04-01",
-      endDate: "2022-05-01",
+      startDate: startDate ? startDate : minus30Days,
+      endDate: endDate ? endDate : today,
       dimensions: ["query"],
     },
   };
+
+  if (page) {
+    requestParams.data.dimensionFilterGroups = [
+      {
+        filters: [
+          {
+            dimension: "PAGE",
+            expression: page,
+            operator: "CONTAINS",
+          },
+        ],
+      },
+    ];
+  }
 
   let strikingDistanceKeywords = [];
 
@@ -71,7 +91,6 @@ export const GetStrikingDistanceTerms = async (site, accessToken) => {
 };
 
 export const CrawlGoogleSERP = async (keyword) => {
-  console.log(keyword)
   const search = keyword.split(" ").join("+");
   const SERP = `https://www.google.com/search?q=${search}`;
 

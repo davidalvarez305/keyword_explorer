@@ -17,4 +17,16 @@ export const extractQuestions = (arr) => {
   return cleanedQuestions;
 };
 
-export const getRandomIndex = (limit) => Math.floor(Math.random() * Math.floor(limit));
+export const getRandomIndex = (limit) =>
+  Math.floor(Math.random() * Math.floor(limit));
+
+export const extractSiteFromPage = (page) => {
+  const { host } = new URL(page);
+  return host;
+};
+
+export const calculateDateDifference = (days) => {
+  let xDaysAgo = new Date();
+  xDaysAgo.setTime(xDaysAgo.getTime() - 24 * 60 * 60 * 1000 * days);
+  return xDaysAgo.toISOString().split("T")[0];
+};

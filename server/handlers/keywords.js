@@ -3,6 +3,7 @@ import {
   CrawlGoogleSERP,
   GetStrikingDistanceTerms,
 } from "../actions/keywords.js";
+import { extractSiteFromPage } from "../utils/keywords.js";
 
 export const GetAllKeywordsFromUrl = async (req, res) => {
   if (!req.body.site) {
@@ -34,7 +35,7 @@ export const GetAllKeywordsFromUrl = async (req, res) => {
   }
 };
 
-export const GetPeopleAlsoAskQuestions = async (req, res) => {
+export const GetPeopleAlsoAskQuestionsByKeywords = async (req, res) => {
   if (!req.body.keywords) {
     return res
       .status(400)
@@ -55,8 +56,43 @@ export const GetPeopleAlsoAskQuestions = async (req, res) => {
   return res.status(200).json({ data: peopleAlsoAskQuestions });
 };
 
-export const GetManyPAAQuestions = async (req, res) => {
-  return res.status(200).json({ data: "hey there!" });
+export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
+  if (!req.body.pages) {
+    return res
+      .status(400)
+      .json({ data: "Please include a keyword in the request." });
+  }
+
+  const pagesToCrawl = req.body.pages.split("\n");
+  let keywords = [];
+
+  for (let i = 0; i < pagesToCrawl.length; i++) {
+    const config = {
+      site: extractSiteFromPage(pagesToCrawl[i]),
+      page: pagesToCrawl[i],
+      accessToken: req.session.access_token,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate
+    };
+
+    try {
+      const extractedKeywords = await GetStrikingDistanceTerms(config);
+      keywords = [...keywords, ...extractedKeywords];
+    } catch (err) {
+      return res.status(400).json({ data: err.message });
+    }
+  }
+
+  let peopleAlsoAskQuestions = [];
+  for (let i = 0; i < keywords.length; i++) {
+    try {
+      const questions = await CrawlGoogleSERP(keywords[i]);
+      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...questions];
+    } catch (err) {
+      return res.status(400).json({ data: err.message });
+    }
+  }
+  return res.status(200).json({ data: peopleAlsoAskQuestions });
 };
 
 export const GetLowPickingsKeywords = async (req, res) => {

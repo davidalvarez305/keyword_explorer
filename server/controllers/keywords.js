@@ -2,8 +2,8 @@ import express from "express";
 
 import {
   GetAllKeywordsFromUrl,
-  GetPeopleAlsoAskQuestions,
-  GetManyPAAQuestions,
+  GetPeopleAlsoAskQuestionsByKeywords,
+  GetPeopleAlsoAskQuestionsByURL,
   GetLowPickingsKeywords,
   GetStrikingDistanceKeywords,
   GetAccountSites,
@@ -16,10 +16,10 @@ const router = express.Router();
 router.post("/", googleAuth, GetAllKeywordsFromUrl);
 
 // Get 1 Keyword's "People Also Ask" Questions
-router.post("/questions", googleAuth, GetPeopleAlsoAskQuestions);
+router.post("/questions", googleAuth, GetPeopleAlsoAskQuestionsByKeywords);
 
 // Get Many "People Also Ask" Questions From Many Keywords
-router.post("/many-questions", googleAuth, GetManyPAAQuestions);
+router.post("/many-questions", googleAuth, GetPeopleAlsoAskQuestionsByURL);
 
 // Get "Low Pickings" Keywords From URL
 router.post("/low-pickings", googleAuth, GetLowPickingsKeywords);
