@@ -30,3 +30,17 @@ export const calculateDateDifference = (days) => {
   xDaysAgo.setTime(xDaysAgo.getTime() - 24 * 60 * 60 * 1000 * days);
   return xDaysAgo.toISOString().split("T")[0];
 };
+
+export const removeDuplicatesAndAppendKeywords = (rows, page) => {
+  let keywords = [];
+  for (let i = 0; i < rows.length; i++) {
+    if (!keywords.includes(rows[i].keys[0])) {
+      let kwObj = {};
+      kwObj.keyword = rows[i].keys[0];
+      kwObj.position = rows[i].position;
+      kwObj.page = page;
+      keywords.push(kwObj);
+    }
+  }
+  return keywords;
+};

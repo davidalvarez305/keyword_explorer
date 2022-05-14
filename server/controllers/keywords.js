@@ -7,6 +7,7 @@ import {
   GetLowPickingsKeywords,
   GetStrikingDistanceKeywords,
   GetAccountSites,
+  GetKeywordPositionsByURL,
 } from "../handlers/keywords.js";
 import { googleAuth } from "../middleware/googleAuth.js";
 
@@ -26,6 +27,9 @@ router.post("/low-pickings", googleAuth, GetLowPickingsKeywords);
 
 // Get Striking Distance Keywords From URL
 router.post("/striking-distance", googleAuth, GetStrikingDistanceKeywords);
+
+// Get Keyword Positions By URL
+router.post("/positions", googleAuth, GetKeywordPositionsByURL);
 
 // Get URLs of Websites Associated With Account
 router.get("/sites", googleAuth, GetAccountSites);

@@ -5,7 +5,10 @@ import {
   GetPAAFromURL,
   GetStrikingDistanceTerms,
 } from "../actions/keywords.js";
-import { extractSiteFromPage } from "../utils/keywords.js";
+import {
+  extractSiteFromPage,
+  removeDuplicatesAndAppendKeywords,
+} from "../utils/keywords.js";
 
 export const GetKeywordsFromURL = async (req, res) => {
   if (!req.body.page) {
@@ -118,4 +121,37 @@ export const GetAccountSites = async (req, res) => {
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }
+};
+
+export const GetKeywordPositionsByURL = async (req, res) => {
+  if (!req.body.pages) {
+    return res
+      .status(400)
+      .json({ data: "Please include a site in your request." });
+  }
+
+  const pagesToCrawl = req.body.pages.split("\n");
+  let keywordsArray = [];
+
+  for (let i = 0; i < pagesToCrawl.length; i++) {
+    const config = {
+      site: extractSiteFromPage(pagesToCrawl[i]),
+      page: pagesToCrawl[i],
+      accessToken: req.session.access_token,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+    };
+
+    try {
+      const keywords = await RequestKeywords(config);
+      keywordsArray = [
+        ...keywordsArray,
+        ...removeDuplicatesAndAppendKeywords(keywords, pagesToCrawl[i]),
+      ];
+    } catch (err) {
+      return res.status(400).json({ data: err.message });
+    }
+  }
+
+  return res.status(200).json({ data: keywordsArray });
 };
