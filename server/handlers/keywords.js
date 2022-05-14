@@ -1,4 +1,5 @@
 import axios from "axios";
+import { GetStrikingDistanceTerms } from "../actions/keywords.js";
 
 export const GetAllKeywordsFromUrl = async (req, res) => {
   if (!req.body.site) {
@@ -43,7 +44,25 @@ export const GetLowPickingsKeywords = async (req, res) => {
 };
 
 export const GetStrikingDistanceKeywords = async (req, res) => {
-  return res.status(200).json({ data: "hey there!" });
+  if (!req.body.sites) {
+    return res
+      .status(400)
+      .json({ data: "Please include sites in your request." });
+  }
+
+  let strikingDistanceKeywords = [];
+  for (let i = 0; i < req.body.sites.length; i++) {
+    try {
+      const keywords = await GetStrikingDistanceTerms(
+        req.body.sites[i],
+        req.session.access_token
+      );
+      strikingDistanceKeywords = [...strikingDistanceKeywords, ...keywords];
+      return res.status(200).json({ data: strikingDistanceKeywords });
+    } catch (err) {
+      return res.status(500).json({ data: err.message });
+    }
+  }
 };
 
 export const GetAccountSites = async (req, res) => {
