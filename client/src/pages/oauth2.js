@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 
 export default function OAuth2() {
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState('');
   let [searchParams] = useSearchParams();
   useEffect(() => {
     searchParams.forEach((val, key) => {
-      if (key === "code") {
+      if (key === 'code') {
         setCode(val);
       }
     });
@@ -24,14 +24,14 @@ export default function OAuth2() {
   return (
     <div
       style={{
-        height: "100vh",
-        width: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        height: '100vh',
+        width: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
       }}
     >
-      <p style={{ fontSize: 32, fontFamily: "Georgia" }}>{"...Loading"}</p>
+      <p style={{ fontSize: 32, fontFamily: 'Georgia' }}>{'...Loading'}</p>
     </div>
   );
 }

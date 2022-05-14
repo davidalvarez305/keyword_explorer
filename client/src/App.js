@@ -1,4 +1,7 @@
-import { useNavigate } from "react-router-dom";
+import React from 'react';
+import {
+  Box,
+} from '@chakra-ui/react';
 
 function App() {
   function getToken() {
@@ -32,31 +35,9 @@ function App() {
   }
 
   return (
-    <>
-      <div>Hey!</div>
-      <button
-        style={{
-          height: 50,
-          borderRadius: 100,
-          borderWidth: 5,
-          borderColor: "red",
-        }}
-        onClick={getToken}
-      >
-        Click here
-      </button>
-      <button
-        style={{
-          height: 50,
-          borderRadius: 100,
-          borderWidth: 5,
-          borderColor: "red",
-        }}
-        onClick={testRequest}
-      >
-        Test here
-      </button>
-    </>
+    <Box>
+      Hey there
+    </Box>
   );
 }
 
