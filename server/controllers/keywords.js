@@ -28,6 +28,6 @@ router.post("/low-pickings", googleAuth, GetLowPickingsKeywords);
 router.post("/striking-distance", googleAuth, GetStrikingDistanceKeywords);
 
 // Get URLs of Websites Associated With Account
-router.post("/sites", googleAuth, GetAccountSites);
+router.get("/sites", googleAuth, GetAccountSites);
 
 export default router;

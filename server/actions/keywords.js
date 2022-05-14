@@ -1,4 +1,4 @@
-import "dotenv/config"
+import "dotenv/config";
 
 export const QueryGoogleKeywordPlanner = (query, token) => {
   const route = `https://googleads.googleapis.com/v10/customers/${GOOGLE_CUSTOMER_ID}:generateKeywordIdeas`;
@@ -26,3 +26,5 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
     }, 1000);
   });
 };
+
+export const GetAllKeywordsForOneSite = (req) => {};

@@ -80,8 +80,8 @@ export const GetAccessToken = async (req) => {
 export const RefreshGoogleToken = async (req) => {
   let refreshToken = "";
   return new Promise(async (resolve, reject) => {
-    // If User cleared cookies and there's no refresh token, get it from DB.
 
+    // If User cleared cookies and there's no refresh token, get it from DB.
     if (!req.session.refresh_token) {
       try {
         const user = await User.findOneBy({ id: req.session.userId });
