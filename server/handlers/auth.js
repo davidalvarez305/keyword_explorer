@@ -1,7 +1,11 @@
-import { GetAuthToken, GetAccessToken, RefreshGoogleToken } from "../actions/auth.js";
+import {
+  GetAuthToken,
+  GetAccessToken,
+  RefreshGoogleToken,
+} from "../actions/auth.js";
 
 export const RequestAuthToken = (req, res) => {
-    GetAuthToken(req.body.scope)
+  GetAuthToken(req.body.scope)
     .then((token) => {
       return res.status(200).json({ data: token });
     })
@@ -11,7 +15,7 @@ export const RequestAuthToken = (req, res) => {
 };
 
 export const RequestAccessToken = async (req, res) => {
-  GetAccessToken(req.body)
+  GetAccessToken(req)
     .then((data) => {
       return res.status(200).json({ data });
     })
@@ -21,7 +25,7 @@ export const RequestAccessToken = async (req, res) => {
 };
 
 export const RefreshToken = async (req, res) => {
-  RefreshGoogleToken()
+  RefreshGoogleToken(req)
     .then((data) => {
       return res.status(200).json({ data });
     })

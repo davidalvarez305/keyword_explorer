@@ -6,7 +6,7 @@ function App() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        scope: `https://www.googleapis.com/auth/webmasters.readonly`,
+        scope: `https://www.googleapis.com/auth/webmasters`,
       }),
     })
       .then(async (res) => {

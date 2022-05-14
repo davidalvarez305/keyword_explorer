@@ -22,11 +22,17 @@ export const GetAuthToken = (scope) => {
       .then((final) => {
         resolve(final.request._redirectable._currentUrl);
       })
-      .catch(reject);
+      .catch((err) => {
+        if (__prod__) {
+          reject(err.message);
+        } else {
+          reject({ message: err });
+        }
+      });
   });
 };
 
-export const GetAccessToken = async (body) => {
+export const GetAccessToken = async (req) => {
   return new Promise((resolve, reject) => {
     axios
       .post(config.default.web.token_uri, null, {
@@ -34,16 +40,16 @@ export const GetAccessToken = async (body) => {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         params: {
-          code: body.code,
+          code: req.body.code,
           client_id: config.default.web.client_id,
           client_secret: config.default.web.client_secret,
           redirect_uri: REDIRECT_URI,
-          scope: body.scope,
+          scope: req.body.scope,
           grant_type: "authorization_code",
         },
       })
-      .then((data) => {
-        console.log(req.session)
+      .then(async (data) => {
+        console.log(req.session);
         // Persist data to Cookie
         req.session.refresh_token = data.data.refresh_token;
         req.session.access_token = data.data.access_token;
@@ -51,13 +57,13 @@ export const GetAccessToken = async (body) => {
 
         // Persist data to Database
         User.findOneBy({ id: req.session.userId })
-          .then((u) => {
+          .then(async (u) => {
             u.refresh_token = data.data.refresh_token;
-            u.save();
+            await User.save(u);
           })
           .catch((err) => {
             console.error("Failed to persist refresh token to user database.");
-            reject(err);
+            reject({ message: err });
           });
         resolve(data.data);
       })
@@ -65,34 +71,48 @@ export const GetAccessToken = async (body) => {
         if (__prod__) {
           reject(e.message);
         } else {
-          reject(e);
+          reject({ message: e });
         }
       });
   });
 };
 
-export const RefreshGoogleToken = () => {
+export const RefreshGoogleToken = async (req) => {
+  let refreshToken = "";
   return new Promise((resolve, reject) => {
+    // If User cleared cookies and there's no refresh token, get it from DB.
+    if (!req.session.refresh_token) {
+      User.findOneBy({ id: req.session.userId })
+        .then((user) => {
+          refreshToken = user.refresh_token;
+        })
+        .catch((err) => {
+          reject(err.message);
+        });
+    } else {
+      refreshToken = req.session.refresh_token;
+    }
+
     axios
       .post(config.default.web.token_uri, null, {
         params: {
-          client_secret: config.default.web.oauth_client_secret,
+          client_secret: config.default.web.client_secret,
           client_id: config.default.web.client_id,
-          refresh_token: GOOGLE_REFRESH_TOKEN,
+          refresh_token: refreshToken,
           grant_type: "refresh_token",
         },
       })
       .then((data) => {
-        // Add logic for appending a temprary access token to the user which will be used for requests.
-        // Create logic for whenever user requests fail because of access token to refresh
-        // Automatically detect if it's been more than 1 hour.
+        req.session.refresh_token = data.data.refresh_token;
+        req.session.access_token = data.data.access_token;
+        req.session.lastRequest = Date.now();
         resolve(data.data);
       })
       .catch((e) => {
         if (__prod__) {
           reject(e.message);
         } else {
-          reject(e);
+          reject({ message: e });
         }
       });
   });

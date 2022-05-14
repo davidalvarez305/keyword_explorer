@@ -11,14 +11,14 @@ export default function OAuth2() {
       }
     });
     if (code.length > 0) {
-      fetch(process.env.REACT_APP_AUTH_API + "token", {
+      /* fetch(process.env.REACT_APP_AUTH_API + "token", {
         method: "POST",
         body: JSON.stringify({
           code: code,
-          scope: 'https://www.googleapis.com/auth/webmasters.readonly',
+          scope: 'https://www.googleapis.com/auth/webmasters',
         }),
         headers: { "Content-Type": "application/json" },
-      });
+      }); */
     }
   }, [code]);
   return (
