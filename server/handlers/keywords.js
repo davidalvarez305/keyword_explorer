@@ -1,21 +1,26 @@
-import { RefreshGoogleToken } from "../actions/auth.js";
+import axios from "axios";
 
 export const GetAllKeywordsFromUrl = async (req, res) => {
-  let token = "";
+  try {
+    const { data } = await axios({
+      url: `https://searchconsole.googleapis.com/webmasters/v3/sites/https%3A%2F%2F${req.body.site}/searchAnalytics/query?key=${process.env.API_KEY}`,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${req.session.access_token}`,
+        Accept: "application/json",
+      },
+      data: {
+        startDate: "2022-04-01",
+        endDate: "2022-05-01",
+        dimensions: ["query"],
+      },
+    });
 
-  if ((Date.now() - req.session.lastRequest) / 1000 < 3600) {
-    token = req.session.access_token;
-  } else {
-    RefreshGoogleToken(req)
-      .then((data) => {
-        token = data.access_token;
-      })
-      .catch((err) => {
-        return res.status(400).json({ data: err.message });
-      });
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
   }
-
-  return res.status(200).json({ data: "hey there!" });
 };
 
 export const GetPeopleAlsoAskQuestions = async (req, res) => {
@@ -31,5 +36,9 @@ export const GetLowPickingsKeywords = async (req, res) => {
 };
 
 export const GetStrikingDistanceKeywords = async (req, res) => {
+  return res.status(200).json({ data: "hey there!" });
+};
+
+export const GetAccountSites = async (req, res) => {
   return res.status(200).json({ data: "hey there!" });
 };
