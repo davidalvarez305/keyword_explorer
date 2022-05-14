@@ -35,19 +35,24 @@ export const GetAllKeywordsFromUrl = async (req, res) => {
 };
 
 export const GetPeopleAlsoAskQuestions = async (req, res) => {
-  if (!req.body.keyword) {
+  if (!req.body.keywords) {
     return res
       .status(400)
       .json({ data: "Please include a keyword in the request." });
   }
 
-  CrawlGoogleSERP(req.body.keyword)
-    .then((data) => {
-      return res.status(200).json({ data });
-    })
-    .catch((err) => {
+  const searchTerms = req.body.keywords.split("\n");
+
+  let peopleAlsoAskQuestions = [];
+  for (let i = 0; i < searchTerms.length; i++) {
+    try {
+      const questions = await CrawlGoogleSERP(searchTerms[i]);
+      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...questions];
+    } catch (err) {
       return res.status(400).json({ data: err.message });
-    });
+    }
+  }
+  return res.status(200).json({ data: peopleAlsoAskQuestions });
 };
 
 export const GetManyPAAQuestions = async (req, res) => {
@@ -59,17 +64,19 @@ export const GetLowPickingsKeywords = async (req, res) => {
 };
 
 export const GetStrikingDistanceKeywords = async (req, res) => {
-  if (!req.body.sites) {
+  if (!req.body.pages) {
     return res
       .status(400)
-      .json({ data: "Please include sites in your request." });
+      .json({ data: "Please include pages in your request." });
   }
 
+  const pagesToCrawl = req.body.pages.split("\n");
+
   let strikingDistanceKeywords = [];
-  for (let i = 0; i < req.body.sites.length; i++) {
+  for (let i = 0; i < pagesToCrawl.length; i++) {
     try {
       const keywords = await GetStrikingDistanceTerms(
-        req.body.sites[i],
+        pagesToCrawl[i],
         req.session.access_token
       );
       strikingDistanceKeywords = [...strikingDistanceKeywords, ...keywords];

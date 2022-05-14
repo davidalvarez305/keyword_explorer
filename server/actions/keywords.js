@@ -71,6 +71,7 @@ export const GetStrikingDistanceTerms = async (site, accessToken) => {
 };
 
 export const CrawlGoogleSERP = async (keyword) => {
+  console.log(keyword)
   const search = keyword.split(" ").join("+");
   const SERP = `https://www.google.com/search?q=${search}`;
 
