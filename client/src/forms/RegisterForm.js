@@ -1,45 +1,29 @@
-import { Box, FormControl, FormLabel, Stack, Button } from '@chakra-ui/react';
+import { Box, Stack, Button } from '@chakra-ui/react';
+import { Form } from 'formik';
 import SimpleInputField from '../components/SimpleInputField';
 
-export default function RegisterForm({
-  values,
-  handleChange,
-  isLoading,
-  registerError,
-}) {
+export default function RegisterForm({ isLoading, registerError }) {
   return (
-    <Stack spacing={4}>
-      <FormControl id="username">
-        <FormLabel>Username</FormLabel>
+    <Form>
+      <Stack spacing={4}>
         <SimpleInputField
-          value={values.Username}
-          handleChange={handleChange}
+          label={'Username'}
           name="username"
-          placeholderValue={'Enter username...'}
+          placeholder={'Enter username...'}
         />
-      </FormControl>
-      <FormControl id="password">
-        <FormLabel>Password</FormLabel>
         <SimpleInputField
-          value={values.Password}
-          handleChange={handleChange}
           name="password"
           type="password"
-          placeholderValue={'Enter password...'}
+          label={'Password'}
+          placeholder={'Enter password...'}
         />
-      </FormControl>
-      <FormControl id="email">
-        <FormLabel>Email</FormLabel>
         <SimpleInputField
-          value={values.Email}
-          handleChange={handleChange}
           name="email"
           type="email"
-          placeholderValue={'Enter email...'}
+          label={'Email'}
+          placeholder={'Enter email...'}
         />
-      </FormControl>
-      <Stack spacing={10}>
-        {isLoading ? (
+        <Stack spacing={10}>
           <Button
             isLoading={isLoading}
             loadingText="Submitting"
@@ -49,42 +33,32 @@ export default function RegisterForm({
               bg: 'blue.500',
             }}
             variant="outline"
-          ></Button>
-        ) : (
-          <>
-            <Button
-              bg={'blue.400'}
-              color={'white'}
-              _hover={{
-                bg: 'blue.500',
+            type={'Submit'}
+          >
+            Register
+          </Button>
+          {registerError.message.length > 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              type="submit"
-              value="Submit"
             >
-              Register
-            </Button>
-            {registerError.message.length > 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+              <p
+                style={{
+                  fontFamily: 'Georgia',
+                  color: 'red',
+                  fontSize: 18,
                 }}
               >
-                <p
-                  style={{
-                    fontFamily: 'Georgia',
-                    color: 'red',
-                    fontSize: 18,
-                  }}
-                >
-                  {registerError.message}
-                </p>
-              </Box>
-            )}
-          </>
-        )}
+                {registerError.message}
+              </p>
+            </Box>
+          )}
+          )
+        </Stack>
       </Stack>
-    </Stack>
+    </Form>
   );
 }

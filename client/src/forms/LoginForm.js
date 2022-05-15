@@ -1,35 +1,23 @@
-import { Box, FormControl, FormLabel, Stack, Button } from '@chakra-ui/react';
+import { Box, Stack, Button } from '@chakra-ui/react';
+import { Form } from 'formik';
 import SimpleInputField from '../components/SimpleInputField';
 
-export default function LoginForm({
-  values,
-  handleChange,
-  isLoading,
-  loginError,
-}) {
+export default function LoginForm({ isLoading, loginError }) {
   return (
-    <Stack spacing={4}>
-      <FormControl id="username">
-        <FormLabel>Username</FormLabel>
+    <Form>
+      <Stack spacing={4}>
         <SimpleInputField
-          value={values.Username}
-          handleChange={handleChange}
+          label={'Username'}
           name="username"
-          placeholderValue={'Enter username...'}
+          placeholder={'Enter username...'}
         />
-      </FormControl>
-      <FormControl id="password">
-        <FormLabel>Password</FormLabel>
         <SimpleInputField
-          value={values.Password}
-          handleChange={handleChange}
           name="password"
           type="password"
-          placeholderValue={'Enter password...'}
+          label={'Password'}
+          placeholder={'Enter password...'}
         />
-      </FormControl>
-      <Stack spacing={10}>
-        {isLoading ? (
+        <Stack spacing={10}>
           <Button
             isLoading={isLoading}
             loadingText="Submitting"
@@ -39,42 +27,32 @@ export default function LoginForm({
               bg: 'blue.500',
             }}
             variant="outline"
-          ></Button>
-        ) : (
-          <>
-            <Button
-              bg={'blue.400'}
-              color={'white'}
-              _hover={{
-                bg: 'blue.500',
+            type={'Submit'}
+          >
+            Submit
+          </Button>
+          {loginError.message.length > 0 && (
+            <Box
+              sx={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
               }}
-              type="submit"
-              value="Submit"
             >
-              Sign in
-            </Button>
-            {loginError.message.length > 0 && (
-              <Box
-                sx={{
-                  display: 'flex',
-                  justifyContent: 'center',
-                  alignItems: 'center',
+              <p
+                style={{
+                  fontFamily: 'Georgia',
+                  color: 'red',
+                  fontSize: 18,
                 }}
               >
-                <p
-                  style={{
-                    fontFamily: 'Georgia',
-                    color: 'red',
-                    fontSize: 18,
-                  }}
-                >
-                  {loginError.message}
-                </p>
-              </Box>
-            )}
-          </>
-        )}
+                {loginError.message}
+              </p>
+            </Box>
+          )}
+          )
+        </Stack>
       </Stack>
-    </Stack>
+    </Form>
   );
 }

@@ -14,11 +14,11 @@ import { LOGIN_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
+import { Formik } from 'formik';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
   const { Login } = useContext(UserContext);
-  const { values, handleChange } = useFormHook({ username: '', password: '' });
   const { isLoading, makeRequest } = useFetch();
   const [loginError, setLoginError] = useState({ message: '' });
   return (
@@ -36,9 +36,10 @@ export default function LoginScreen() {
           boxShadow={'lg'}
           p={8}
         >
-          <form
-            onSubmit={e => {
-              e.preventDefault();
+          <Formik
+            initialValues={{ username: '', password: '' }}
+            onSubmit={values => {
+              console.log('Submitted');
               makeRequest(
                 {
                   url: LOGIN_ROUTE,
@@ -57,13 +58,8 @@ export default function LoginScreen() {
               );
             }}
           >
-            <LoginForm
-              values={values}
-              handleChange={handleChange}
-              isLoading={isLoading}
-              loginError={loginError}
-            />
-          </form>
+            <LoginForm isLoading={isLoading} loginError={loginError} />
+          </Formik>
           <LoginOrRegister text={'Create Account'} navigatePage={'register'} />
         </Box>
       </Stack>

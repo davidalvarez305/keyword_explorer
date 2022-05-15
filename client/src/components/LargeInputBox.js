@@ -13,7 +13,10 @@ export default function LargeInputBox({ label, ...props }) {
   return (
     <Box>
       <FormControl>
-        <FormLabel sx={{ display: 'flex', justifyContent: 'center' }}>
+        <FormLabel
+          htmlFor={field.name}
+          sx={{ display: 'flex', justifyContent: 'center' }}
+        >
           {label}
         </FormLabel>
         <Textarea {...props} {...field} />

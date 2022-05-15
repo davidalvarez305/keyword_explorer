@@ -1,28 +1,24 @@
+import {
+  FormControl,
+  FormErrorMessage,
+  FormLabel,
+} from '@chakra-ui/form-control';
 import { Input } from '@chakra-ui/input';
 import { Box } from '@chakra-ui/layout';
+import { useField } from 'formik';
 import React from 'react';
 
-const SimpleInputField = ({
-  value,
-  name,
-  handleChange,
-  type,
-  onPressEnter,
-  placeholderValue,
-}) => {
+export default function SimpleInputField({ label, ...props }) {
+  const [field, meta] = useField(props);
   return (
     <Box>
-      <Input
-        type={type ? type : `text`}
-        size="md"
-        onChange={handleChange}
-        value={value}
-        name={name}
-        placeholder={placeholderValue ? placeholderValue : 'Input...'}
-        onKeyDown={e => (onPressEnter ? onPressEnter(e) : undefined)}
-      />
+      <FormControl>
+        <FormLabel htmlFor={field.name}>{label}</FormLabel>
+        <Input {...props} {...field} />
+        {meta.error && meta.touched && (
+          <FormErrorMessage>{meta.error}</FormErrorMessage>
+        )}
+      </FormControl>
     </Box>
   );
-};
-
-export default SimpleInputField;
+}
