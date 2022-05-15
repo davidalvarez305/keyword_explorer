@@ -2,8 +2,10 @@ import React from 'react';
 import {
   Box,
 } from '@chakra-ui/react';
+import useAuth from './hooks/useAuth';
 
 function App() {
+  useAuth();
   function getToken() {
     fetch(process.env.REACT_APP_AUTH_API, {
       method: "POST",

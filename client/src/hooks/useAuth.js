@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import { ME_ROUTE } from '../constants';
 import useFetch from './useFetch';
 
 const useAuth = () => {
+  const navigate = useNavigate();
   const { makeRequest } = useFetch();
   useEffect(() => {
     makeRequest(
@@ -11,16 +13,13 @@ const useAuth = () => {
         method: 'GET',
       },
       async res => {
-        console.log('res data: ', res.data);
-        const data = await res.json();
-        console.log('data: ', data);
-        if (!data) {
-          return;
+        if (res.data.data.error) {
+          navigate('/login');
         }
         return;
       }
     );
-  });
+  }, []);
 };
 
 export default useAuth;
