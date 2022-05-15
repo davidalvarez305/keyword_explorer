@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router';
-import useAuth from './useAuth';
+import { UserContext } from '../context/UserContext';
 
 export default function useLoginRequired() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn } = useContext(UserContext);
 
   useEffect(() => {
     if (!isLoggedIn) {

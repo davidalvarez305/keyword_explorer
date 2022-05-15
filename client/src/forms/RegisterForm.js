@@ -1,11 +1,11 @@
 import { Box, FormControl, FormLabel, Stack, Button } from '@chakra-ui/react';
 import SimpleInputField from '../components/SimpleInputField';
 
-export default function LoginForm({
+export default function RegisterForm({
   values,
   handleChange,
   isLoading,
-  loginError,
+  registerError,
 }) {
   return (
     <Stack spacing={4}>
@@ -26,6 +26,16 @@ export default function LoginForm({
           name="password"
           type="password"
           placeholderValue={'Enter password...'}
+        />
+      </FormControl>
+      <FormControl id="email">
+        <FormLabel>Email</FormLabel>
+        <SimpleInputField
+          value={values.Email}
+          handleChange={handleChange}
+          name="email"
+          type="email"
+          placeholderValue={'Enter email...'}
         />
       </FormControl>
       <Stack spacing={10}>
@@ -51,9 +61,9 @@ export default function LoginForm({
               type="submit"
               value="Submit"
             >
-              Sign in
+              Register
             </Button>
-            {loginError.message.length > 0 && (
+            {registerError.message.length > 0 && (
               <Box
                 sx={{
                   display: 'flex',
@@ -68,7 +78,7 @@ export default function LoginForm({
                     fontSize: 18,
                   }}
                 >
-                  {loginError.message}
+                  {registerError.message}
                 </p>
               </Box>
             )}

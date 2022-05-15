@@ -8,11 +8,13 @@ import {
 } from '@chakra-ui/react';
 import useFormHook from '../hooks/useFormHook';
 import useFetch from '../hooks/useFetch';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import LoginForm from '../forms/LoginForm';
 import { LOGIN_ROUTE } from '../constants';
+import { UserContext } from '../context/UserContext';
 
-export default function Login() {
+export default function LoginScreen() {
+  const { Login } = useContext(UserContext);
   const { values, handleChange } = useFormHook({ username: '', password: '' });
   const { isLoading, makeRequest } = useFetch();
   const [loginError, setLoginError] = useState({ message: '' });
@@ -45,7 +47,7 @@ export default function Login() {
                     setLoginError({ message: data.data.data.error });
                   }
                   if (data.data.data.user) {
-                    console.log(data.data.data);
+                    Login(true);
                   }
                 }
               );
