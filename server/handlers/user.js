@@ -73,7 +73,9 @@ export const Me = async (req, res) => {
     findUserById(req.session.userId)
       .then((foundUser) => {
         if (foundUser.user) {
-          const user = foundUser.user.id;
+          let user = {};
+          user.id = foundUser.user.id;
+          user.token = foundUser.user.refresh_token;
           return res.status(200).json({ data: { user } });
         } else {
           const error = foundUser.error;

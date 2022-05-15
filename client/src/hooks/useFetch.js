@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import axios from 'axios';
 
-function useFetchHook() {
+export default function useFetch() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState({ message: '' });
 
@@ -41,5 +41,3 @@ function useFetchHook() {
     errorCallback,
   };
 }
-
-export default useFetchHook;

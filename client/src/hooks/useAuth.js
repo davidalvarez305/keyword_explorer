@@ -4,7 +4,8 @@ import useFetch from './useFetch';
 
 export default function useAuth() {
   const { makeRequest } = useFetch();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isAuthorized, setIsAuthorized] = useState(true);
 
   function Login(loggedIn) {
     setIsLoggedIn(loggedIn);
@@ -31,12 +32,15 @@ export default function useAuth() {
         method: 'GET',
       },
       res => {
-        if (res.data.data.user) {
-          setIsLoggedIn(true);
+        if (!res.data.data.user) {
+          setIsLoggedIn(false);
+        }
+        if (res.data.data.user && !res.data.data.user.token) {
+          setIsAuthorized(false);
         }
       }
     );
   }, []);
 
-  return { isLoggedIn, Login, Logout };
+  return { isAuthorized, isLoggedIn, Login, Logout };
 }

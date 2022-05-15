@@ -4,11 +4,13 @@ import { UserContext } from '../context/UserContext';
 
 export default function useLoginRequired() {
   const navigate = useNavigate();
-  const { isLoggedIn } = useContext(UserContext);
+  const { isLoggedIn, isAuthorized } = useContext(UserContext);
 
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/login');
+    } else if (!isAuthorized) {
+      navigate('/authorize');
     }
   }, []);
 }
