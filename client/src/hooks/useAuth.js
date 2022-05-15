@@ -1,25 +1,42 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
-import { ME_ROUTE } from '../constants';
+import { useEffect, useState } from 'react';
+import { LOGOUT_ROUTE, ME_ROUTE } from '../constants';
 import useFetch from './useFetch';
 
-const useAuth = () => {
-  const navigate = useNavigate();
+export default function useAuth() {
   const { makeRequest } = useFetch();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  function Login(loggedIn) {
+    setIsLoggedIn(loggedIn);
+  }
+
+  function Logout() {
+    makeRequest(
+      {
+        url: `${LOGOUT_ROUTE}`,
+        method: 'POST',
+      },
+      res => {
+        if (res.data.data === 'Logged out!') {
+          setIsLoggedIn(false);
+        }
+      }
+    );
+  }
+
   useEffect(() => {
     makeRequest(
       {
-        url: ME_ROUTE,
+        url: `${ME_ROUTE}`,
         method: 'GET',
       },
-      async res => {
-        if (res.data.data.error) {
-          navigate('/login');
+      res => {
+        if (res.data.data.user) {
+          setIsLoggedIn(true);
         }
-        return;
       }
     );
   }, []);
-};
 
-export default useAuth;
+  return { isLoggedIn, Login, Logout };
+}

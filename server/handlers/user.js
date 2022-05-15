@@ -58,7 +58,7 @@ export const Logout = async (req, res) => {
   if (req.session.userId) {
     await LogoutUser(req, res)
       .then((_) => {
-        return res.status(200).json({ data: true });
+        return res.status(200).json({ data: "Logged out!" });
       })
       .catch((error) => {
         return res.status(500).json({ data: error.message });
@@ -81,7 +81,7 @@ export const Me = async (req, res) => {
         }
       })
       .catch((error) => {
-        console.error(error)
+        console.error(error);
         return res.status(500).json({ data: error.message });
       });
   } else {
