@@ -9,14 +9,21 @@ import useFetch from '../hooks/useFetch';
 import { BsTable } from 'react-icons/bs';
 import { flexStyles } from '../utils/flex';
 import createMatrix from '../utils/createMatrix';
+import { data } from '../utils/data';
 
 export default function KeywordPositions() {
   const { makeRequest } = useFetch();
   const [toggleTable, setToggleTable] = useState(false);
-  const [keywordPositions, setKeywordPositions] = useState([]);
+  const [keywordPositions, setKeywordPositions] = useState(data);
 
   if (toggleTable) {
-    return <KeywordPositionsTable keywordPositions={keywordPositions} setToggleTable={setToggleTable} />;
+    return (
+      <KeywordPositionsTable
+        keywordPositions={keywordPositions}
+        setToggleTable={setToggleTable}
+        setKeywordPositions={setKeywordPositions}
+      />
+    );
   }
 
   return (
@@ -62,7 +69,7 @@ export default function KeywordPositions() {
               >
                 Submit
               </Button>
-              {keywordPositions.length > 0 && (
+              {data.length > 0 && (
                 <Button
                   variant="outline"
                   color="green"

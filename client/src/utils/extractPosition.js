@@ -5,5 +5,5 @@ export default function extractPosition(data, keyword, page) {
       position = data[i].position;
     }
   }
-  return position;
+  return position.toFixed(2);
 }

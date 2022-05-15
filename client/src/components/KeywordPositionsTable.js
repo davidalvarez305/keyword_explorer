@@ -10,20 +10,25 @@ import {
   Td,
   Tfoot,
 } from '@chakra-ui/table';
-import React from 'react';
+import React, { useState } from 'react';
 import createMatrix from '../utils/createMatrix';
 import extractKeywords from '../utils/extractKeywords';
 import extractPages from '../utils/extractPages';
 import { flexStyles } from '../utils/flex';
 import getUrlPath from '../utils/getUrlPath';
+import sortNumbers from '../utils/sortNumbers';
 
 export default function KeywordPositionsTable({
   keywordPositions,
   setToggleTable,
+  setKeywordPositions,
 }) {
   const pages = extractPages(keywordPositions);
   const keywords = extractKeywords(keywordPositions);
   const matrix = createMatrix(keywordPositions, pages, keywords);
+  const [sortDirection, setSortDirection] = useState(false);
+  console.log(keywordPositions);
+
   return (
     <Box
       sx={{
@@ -59,24 +64,40 @@ export default function KeywordPositionsTable({
           <TableCaption>{'Keywords & Positions'}</TableCaption>
           <Thead>
             <Tr>
+              <Th>Keyword</Th>
               {pages.map((page, index) => (
                 <React.Fragment key={index}>
-                  <Th>{getUrlPath(page)}</Th>
+                  <Th
+                    onClick={() => {
+                      setSortDirection(prev => !prev);
+                      setKeywordPositions([
+                        ...sortNumbers(keywordPositions, sortDirection, page),
+                      ]);
+                    }}
+                  >
+                    {getUrlPath(page)}
+                  </Th>
                 </React.Fragment>
               ))}
             </Tr>
           </Thead>
           <Tbody>
-            {keywords.map((_, index) => (
+            {keywords.map((kw, index) => (
               <React.Fragment key={index}>
                 <Tr>
-                  <Td sx={{ width: 225 }}>{matrix[index]}</Td>
+                  <Td>{kw}</Td>
+                  {matrix[index].map((pos, idx) => (
+                    <Td key={idx} sx={{ width: 225 }}>
+                      {pos}
+                    </Td>
+                  ))}
                 </Tr>
               </React.Fragment>
             ))}
           </Tbody>
           <Tfoot>
             <Tr>
+              <Th>Keyword</Th>
               {pages.map((page, index) => (
                 <React.Fragment key={index}>
                   <Th>{getUrlPath(page)}</Th>
