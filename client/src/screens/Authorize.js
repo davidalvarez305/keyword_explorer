@@ -1,5 +1,3 @@
-import { Box } from '@chakra-ui/layout';
-import { Spinner } from '@chakra-ui/spinner';
 import React, { useEffect } from 'react';
 import { REQUEST_TOKEN_ROUTE } from '../constants';
 import useFetch from '../hooks/useFetch';

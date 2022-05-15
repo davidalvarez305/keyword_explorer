@@ -8,16 +8,14 @@ import {
 } from '@chakra-ui/react';
 import useFormHook from '../hooks/useFormHook';
 import useFetch from '../hooks/useFetch';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { REGISTER_ROUTE } from '../constants';
-import { UserContext } from '../context/UserContext';
 import RegisterForm from '../forms/RegisterForm';
 import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
 
 export default function Register() {
   const navigate = useNavigate();
-  const { Login } = useContext(UserContext);
   const { values, handleChange } = useFormHook({
     username: '',
     password: '',
@@ -54,7 +52,7 @@ export default function Register() {
                     setRegisterError({ message: data.data.data.error });
                   }
                   if (data.data.data.user) {
-                    navigate('/login');
+                    navigate('/authorize');
                   }
                 }
               );
