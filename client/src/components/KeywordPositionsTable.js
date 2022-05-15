@@ -35,8 +35,6 @@ export default function KeywordPositionsTable({
       sx={{
         ...flexStyles,
         overflow: 'auto',
-        width: '80vw',
-        flexDirection: 'row',
       }}
     >
       <Box
@@ -69,20 +67,33 @@ export default function KeywordPositionsTable({
               {pages.map((page, index) => (
                 <React.Fragment key={index}>
                   <Th>
-                    <Box sx={{ ...flexStyles, height: '100%', flexDirection: 'row', gap: 4 }}>
-                    {getUrlPath(page)}
-                    <IconButton
-                      aria-label="Sort"
-                      size={'xs'}
-                      colorScheme={sortDirection ? 'red' : 'teal'}
-                      onClick={() => {
-                        setSortDirection(prev => !prev);
-                        setKeywordPositions([
-                          ...sortNumbers(keywordPositions, sortDirection, page),
-                        ]);
+                    <Box
+                      sx={{
+                        ...flexStyles,
+                        height: '100%',
+                        flexDirection: 'row',
+                        gap: 4,
                       }}
-                      icon={sortDirection ? <FaChevronUp /> : <FaChevronDown />}
-                    />
+                    >
+                      {getUrlPath(page)}
+                      <IconButton
+                        aria-label="Sort"
+                        size={'xs'}
+                        colorScheme={sortDirection ? 'red' : 'teal'}
+                        onClick={() => {
+                          setSortDirection(prev => !prev);
+                          setKeywordPositions([
+                            ...sortNumbers(
+                              keywordPositions,
+                              sortDirection,
+                              page
+                            ),
+                          ]);
+                        }}
+                        icon={
+                          sortDirection ? <FaChevronUp /> : <FaChevronDown />
+                        }
+                      />
                     </Box>
                   </Th>
                 </React.Fragment>
