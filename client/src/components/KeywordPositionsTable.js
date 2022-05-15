@@ -1,4 +1,4 @@
-import { Button } from '@chakra-ui/button';
+import { Button, IconButton } from '@chakra-ui/button';
 import { Box } from '@chakra-ui/layout';
 import {
   Table,
@@ -17,6 +17,7 @@ import extractPages from '../utils/extractPages';
 import { flexStyles } from '../utils/flex';
 import getUrlPath from '../utils/getUrlPath';
 import sortNumbers from '../utils/sortNumbers';
+import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
 export default function KeywordPositionsTable({
   keywordPositions,
@@ -67,15 +68,22 @@ export default function KeywordPositionsTable({
               <Th>Keyword</Th>
               {pages.map((page, index) => (
                 <React.Fragment key={index}>
-                  <Th
-                    onClick={() => {
-                      setSortDirection(prev => !prev);
-                      setKeywordPositions([
-                        ...sortNumbers(keywordPositions, sortDirection, page),
-                      ]);
-                    }}
-                  >
+                  <Th>
+                    <Box sx={{ ...flexStyles, height: '100%', flexDirection: 'row', gap: 4 }}>
                     {getUrlPath(page)}
+                    <IconButton
+                      aria-label="Sort"
+                      size={'xs'}
+                      colorScheme={sortDirection ? 'red' : 'teal'}
+                      onClick={() => {
+                        setSortDirection(prev => !prev);
+                        setKeywordPositions([
+                          ...sortNumbers(keywordPositions, sortDirection, page),
+                        ]);
+                      }}
+                      icon={sortDirection ? <FaChevronUp /> : <FaChevronDown />}
+                    />
+                    </Box>
                   </Th>
                 </React.Fragment>
               ))}
@@ -85,7 +93,7 @@ export default function KeywordPositionsTable({
             {keywords.map((kw, index) => (
               <React.Fragment key={index}>
                 <Tr>
-                  <Td>{kw}</Td>
+                  <Td sx={{ width: 350 }}>{kw}</Td>
                   {matrix[index].map((pos, idx) => (
                     <Td key={idx} sx={{ width: 225 }}>
                       {pos}
