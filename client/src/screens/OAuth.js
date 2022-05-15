@@ -1,15 +1,16 @@
-import { Box } from '@chakra-ui/layout';
-import { Spinner } from '@chakra-ui/spinner';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { GET_ACCESS_TOKEN_ROUTE } from '../constants';
 import useFetch from '../hooks/useFetch';
 import { useNavigate } from 'react-router';
+import CenterLoadingText from '../ui/CenterLoadingText';
+import { UserContext } from '../context/UserContext';
 
 export default function OAuth2() {
   const [code, setCode] = useState('');
   const [text, setText] = useState('Loading...');
-  const { makeRequest } = useFetch();
+  const { setIsAuthorized } = useContext(UserContext);
+  const { makeRequest, error } = useFetch();
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
   useEffect(() => {
@@ -30,6 +31,7 @@ export default function OAuth2() {
         },
         res => {
           if (res.data.data) {
+            setIsAuthorized(true);
             setText('Redirecting...');
             navigate('/');
           }
@@ -37,27 +39,5 @@ export default function OAuth2() {
       );
     }
   }, [code]);
-  return (
-    <Box
-      style={{
-        height: '100vh',
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-        fontSize: 40,
-        fontFamily: 'Georgia',
-      }}
-    >
-      {text}
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
-    </Box>
-  );
+  return <CenterLoadingText text={text} errorMessage={error.message} />;
 }

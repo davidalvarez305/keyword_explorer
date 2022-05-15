@@ -3,9 +3,10 @@ import { Spinner } from '@chakra-ui/spinner';
 import React, { useEffect } from 'react';
 import { REQUEST_TOKEN_ROUTE } from '../constants';
 import useFetch from '../hooks/useFetch';
+import CenterLoadingText from '../ui/CenterLoadingText';
 
 export default function Authorize() {
-  const { makeRequest } = useFetch();
+  const { makeRequest, error } = useFetch();
   useEffect(() => {
     makeRequest(
       {
@@ -23,27 +24,5 @@ export default function Authorize() {
     );
   }, []);
 
-  return (
-    <Box
-      style={{
-        height: '100vh',
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-        fontSize: 40,
-        fontFamily: 'Georgia',
-      }}
-    >
-      Authorizing...
-      <Spinner
-        thickness="4px"
-        speed="0.65s"
-        emptyColor="gray.200"
-        color="blue.500"
-        size="xl"
-      />
-    </Box>
-  );
+  return <CenterLoadingText text={'Authorizing...'} errorMessage={error.message} />
 }

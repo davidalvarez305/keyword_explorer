@@ -42,5 +42,5 @@ export default function useAuth() {
     );
   }, []);
 
-  return { isAuthorized, isLoggedIn, Login, Logout };
+  return { isAuthorized, isLoggedIn, Login, Logout, setIsAuthorized };
 }
