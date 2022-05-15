@@ -13,6 +13,7 @@ import { REGISTER_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';
 import RegisterForm from '../forms/RegisterForm';
 import { useNavigate } from 'react-router';
+import LoginOrRegister from '../components/LoginOrRegister';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -26,7 +27,7 @@ export default function Register() {
   const [registerError, setRegisterError] = useState({ message: '' });
   return (
     <Flex minH={'100vh'} align={'top'} justify={'center'}>
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
+      <Stack spacing={8} mx={'auto'} minW={'80vh'} py={12} px={6}>
         <Stack align={'center'}>
           <Heading fontSize={'4xl'}>Create An Account</Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
@@ -66,6 +67,7 @@ export default function Register() {
               registerError={registerError}
             />
           </form>
+          <LoginOrRegister text={'Have an account? Login.'} navigatePage={'login'} />
         </Box>
       </Stack>
     </Flex>

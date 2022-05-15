@@ -12,15 +12,18 @@ import { useContext, useState } from 'react';
 import LoginForm from '../forms/LoginForm';
 import { LOGIN_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';
+import { useNavigate } from 'react-router';
+import LoginOrRegister from '../components/LoginOrRegister';
 
 export default function LoginScreen() {
+  const navigate = useNavigate();
   const { Login } = useContext(UserContext);
   const { values, handleChange } = useFormHook({ username: '', password: '' });
   const { isLoading, makeRequest } = useFetch();
   const [loginError, setLoginError] = useState({ message: '' });
   return (
     <Flex minH={'100vh'} align={'top'} justify={'center'}>
-      <Stack spacing={8} mx={'auto'} maxW={'lg'} py={12} px={6}>
+      <Stack spacing={8} mx={'auto'} minW={'80vh'} py={12} px={6}>
         <Stack align={'center'}>
           <Heading fontSize={'4xl'}>Sign in to your account</Heading>
           <Text fontSize={'lg'} color={'gray.600'}>
@@ -48,6 +51,7 @@ export default function LoginScreen() {
                   }
                   if (data.data.data.user) {
                     Login(true);
+                    navigate('/');
                   }
                 }
               );
@@ -60,6 +64,7 @@ export default function LoginScreen() {
               loginError={loginError}
             />
           </form>
+          <LoginOrRegister text={'Create Account'} navigatePage={'register'} />
         </Box>
       </Stack>
     </Flex>
