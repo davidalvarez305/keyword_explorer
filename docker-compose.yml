@@ -8,15 +8,15 @@ services:
       - .env
     ports:
       - "4010:4010"
-    depends_on:
-      - redis
   postgres:
     build: ./postgres
     restart: always
+    env_file:
+      - .env
     volumes:
       - static_data:/var/lib/postgresql/data/pgdata/
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
 volumes:
   static_data:
