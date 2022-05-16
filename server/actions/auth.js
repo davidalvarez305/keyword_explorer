@@ -92,7 +92,7 @@ export const RefreshGoogleToken = async (req) => {
     }
 
     axios
-      .post(config.default.web.token_uri, null, {
+      .post(process.env.GOOGLE_TOKEN_URI, null, {
         params: {
           client_id: process.env.GOOGLE_CLIENT_ID,
           client_secret: process.env.GOOGLE_CLIENT_SECRET,
