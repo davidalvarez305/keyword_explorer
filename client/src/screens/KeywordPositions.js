@@ -1,4 +1,4 @@
-import {  Formik } from 'formik';
+import { Formik } from 'formik';
 import React, { useState } from 'react';
 import KeywordPositionsTable from '../components/KeywordPositionsTable';
 import { KEYWORD_POSITIONS_ROUTE } from '../constants';
@@ -16,7 +16,6 @@ export default function KeywordPositions() {
       <KeywordPositionsTable
         keywordPositions={keywordPositions}
         setToggleTable={setToggleTable}
-        setKeywordPositions={setKeywordPositions}
       />
     );
   }

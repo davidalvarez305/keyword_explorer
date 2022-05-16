@@ -10,7 +10,7 @@ import {
   Td,
   Tfoot,
 } from '@chakra-ui/table';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import createMatrix from '../utils/createMatrix';
 import extractKeywords from '../utils/extractKeywords';
 import extractPages from '../utils/extractPages';
@@ -25,18 +25,43 @@ import filterValues from '../utils/filterValues';
 export default function KeywordPositionsTable({
   keywordPositions,
   setToggleTable,
-  setKeywordPositions,
 }) {
   const [filteredValues, setFilteredValues] = useState(keywordPositions);
-  const pages = extractPages(filteredValues);
-  const keywords = extractKeywords(filteredValues);
-  const matrix = createMatrix(filteredValues, pages, keywords);
   const [sortDirection, setSortDirection] = useState(false);
   const { values, handleChange } = useFormHook({ filter: '' });
+  const [startIndex, setStartIndex] = useState(0);
+  const [slicedData, setSlicedData] = useState([
+    ...filteredValues.slice(startIndex, startIndex + 100),
+  ]);
+  const pages = extractPages(filteredValues);
+  const keywords = extractKeywords(slicedData);
+  const matrix = createMatrix(filteredValues, pages, keywords);
+
+  const observer = useRef(null);
+
+  const lastElement = useCallback(el => {
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) {
+        console.log('seen...');
+        setStartIndex(prev => (prev += 100));
+        setSlicedData(prev => {
+          return [
+            ...prev,
+            ...filteredValues.slice(startIndex, startIndex + 100),
+          ];
+        });
+      }
+    });
+    if (el) observer.current.observe(el);
+  });
 
   useEffect(() => {
-    setFilteredValues(filterValues(keywordPositions, values.filter));
-  }, [values.filter]);
+    setFilteredValues([...filterValues(keywordPositions, values.filter)]);
+    setSlicedData(() => {
+      return [...filteredValues.slice(startIndex, startIndex + 100)];
+    });
+  }, [values.filter, sortDirection, startIndex]);
 
   return (
     <Box
@@ -96,12 +121,8 @@ export default function KeywordPositionsTable({
                         colorScheme={sortDirection ? 'red' : 'teal'}
                         onClick={() => {
                           setSortDirection(prev => !prev);
-                          setKeywordPositions([
-                            ...sortNumbers(
-                              keywordPositions,
-                              sortDirection,
-                              page
-                            ),
+                          setFilteredValues([
+                            ...sortNumbers(filteredValues, sortDirection, page),
                           ]);
                         }}
                         icon={
@@ -118,7 +139,17 @@ export default function KeywordPositionsTable({
             {keywords.map((kw, index) => (
               <React.Fragment key={index}>
                 <Tr>
-                  <Td sx={{ width: 350 }}>{kw}</Td>
+                  <>
+                    {keywords.length === index + 1 ? (
+                      <Td key={index} ref={lastElement} sx={{ width: 225 }}>
+                        {kw}
+                      </Td>
+                    ) : (
+                      <Td key={index} sx={{ width: 225 }}>
+                        {kw}
+                      </Td>
+                    )}
+                  </>
                   {matrix[index].map((pos, idx) => (
                     <Td key={idx} sx={{ width: 225 }}>
                       {pos}
