@@ -47,6 +47,7 @@ const index = async () => {
   });
 
   // Session Configuration
+  const domain = new URL(process.env.CLIENT_URL);
   app.use(
     session({
       name: process.env.COOKIE_NAME,
@@ -63,7 +64,7 @@ const index = async () => {
         httpOnly: true,
         secure: __prod__,
         sameSite: "lax",
-        domain: __prod__ ? `.${process.env.CLIENT_DOMAIN}` : undefined,
+        domain: __prod__ ? `.${domain.hostname}` : undefined,
       },
     })
   );

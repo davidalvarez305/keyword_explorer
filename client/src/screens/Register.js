@@ -13,7 +13,6 @@ import RegisterForm from '../forms/RegisterForm';
 import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
 import { Formik } from 'formik';
-import useLoginRequired from '../hooks/useLoginRequired';
 
 export default function Register() {
   const navigate = useNavigate();

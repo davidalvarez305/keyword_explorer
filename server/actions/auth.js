@@ -1,5 +1,4 @@
 import axios from "axios";
-import * as config from "../google.json" assert { type: "json" };
 import { __prod__, REDIRECT_URI } from "../constants.js";
 import { AppDataSource } from "../database/db.js";
 import { UserColumns } from "../models/user.js";
@@ -9,12 +8,12 @@ const User = AppDataSource.getRepository(UserColumns);
 export const GetAuthToken = (scope) => {
   return new Promise((resolve, reject) => {
     axios
-      .post(config.default.web.auth_uri, null, {
+      .post(process.env.GOOGLE_AUTH_URI, null, {
         params: {
           access_type: "offline",
           approval_prompt: "force",
           scope: scope,
-          client_id: config.default.web.client_id,
+          client_id: process.env.GOOGLE_CLIENT_ID,
           redirect_uri: REDIRECT_URI,
           response_type: "code",
         },
@@ -35,14 +34,14 @@ export const GetAuthToken = (scope) => {
 export const GetAccessToken = async (req) => {
   return new Promise((resolve, reject) => {
     axios
-      .post(config.default.web.token_uri, null, {
+      .post(process.env.GOOGLE_TOKEN_URI, null, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
         params: {
           code: req.body.code,
-          client_id: config.default.web.client_id,
-          client_secret: config.default.web.client_secret,
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
           redirect_uri: REDIRECT_URI,
           scope: req.body.scope,
           grant_type: "authorization_code",
@@ -80,7 +79,6 @@ export const GetAccessToken = async (req) => {
 export const RefreshGoogleToken = async (req) => {
   let refreshToken = "";
   return new Promise(async (resolve, reject) => {
-
     // If User cleared cookies and there's no refresh token, get it from DB.
     if (!req.session.refresh_token) {
       try {
@@ -96,8 +94,8 @@ export const RefreshGoogleToken = async (req) => {
     axios
       .post(config.default.web.token_uri, null, {
         params: {
-          client_secret: config.default.web.client_secret,
-          client_id: config.default.web.client_id,
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
           refresh_token: refreshToken,
           grant_type: "refresh_token",
         },
