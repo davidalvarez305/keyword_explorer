@@ -10,7 +10,7 @@ import {
   Td,
   Tfoot,
 } from '@chakra-ui/table';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import createMatrix from '../utils/createMatrix';
 import extractKeywords from '../utils/extractKeywords';
 import extractPages from '../utils/extractPages';
@@ -18,17 +18,25 @@ import { flexStyles } from '../utils/flex';
 import getUrlPath from '../utils/getUrlPath';
 import sortNumbers from '../utils/sortNumbers';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
+import FilterInput from './FilterInput';
+import useFormHook from '../hooks/useFormHook';
+import filterValues from '../utils/filterValues';
 
 export default function KeywordPositionsTable({
   keywordPositions,
   setToggleTable,
   setKeywordPositions,
 }) {
-  const pages = extractPages(keywordPositions);
-  const keywords = extractKeywords(keywordPositions);
-  const matrix = createMatrix(keywordPositions, pages, keywords);
+  const [filteredValues, setFilteredValues] = useState(keywordPositions);
+  const pages = extractPages(filteredValues);
+  const keywords = extractKeywords(filteredValues);
+  const matrix = createMatrix(filteredValues, pages, keywords);
   const [sortDirection, setSortDirection] = useState(false);
-  console.log(keywordPositions);
+  const { values, handleChange } = useFormHook({ filter: '' });
+
+  useEffect(() => {
+    setFilteredValues(filterValues(keywordPositions, values.filter));
+  }, [values.filter]);
 
   return (
     <Box
@@ -58,6 +66,12 @@ export default function KeywordPositionsTable({
           >
             {'Return to Search'}
           </Button>
+          <FilterInput
+            name={'filter'}
+            value={values.filter}
+            onChange={handleChange}
+            placeholder={'Filter...'}
+          />
         </Box>
         <Table>
           <TableCaption>{'Keywords & Positions'}</TableCaption>

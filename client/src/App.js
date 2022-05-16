@@ -10,7 +10,7 @@ export default function App() {
 
   return (
     <Layout>
-      <Box sx={{ ...flexStyles, maxH: '80vh', maxW: '100%' }}>
+      <Box sx={{ ...flexStyles, maxW: '100%' }}>
         <KeywordPositions />
       </Box>
     </Layout>
