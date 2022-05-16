@@ -8,19 +8,22 @@ import {
 } from '@chakra-ui/react';
 import useFormHook from '../hooks/useFormHook';
 import useFetch from '../hooks/useFetch';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import LoginForm from '../forms/LoginForm';
 import { LOGIN_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
 import { Formik } from 'formik';
+import useLoginRequired from '../hooks/useLoginRequired';
 
 export default function LoginScreen() {
   const navigate = useNavigate();
   const { Login } = useContext(UserContext);
   const { isLoading, makeRequest } = useFetch();
   const [loginError, setLoginError] = useState({ message: '' });
+  useLoginRequired();
+
   return (
     <Flex minH={'100vh'} align={'top'} justify={'center'}>
       <Stack spacing={8} mx={'auto'} minW={'80vh'} py={12} px={6}>

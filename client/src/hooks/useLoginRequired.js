@@ -6,11 +6,18 @@ export default function useLoginRequired() {
   const navigate = useNavigate();
   const { isLoggedIn, isAuthorized } = useContext(UserContext);
 
+  console.log('isLoggedIn: ', isLoggedIn);
+  console.log('isAuthorized: ', isAuthorized);
+
   useEffect(() => {
     if (!isLoggedIn) {
       navigate('/login');
-    } else if (!isAuthorized) {
+    }
+    if (isLoggedIn && !isAuthorized) {
       navigate('/authorize');
     }
-  }, []);
+    if (isLoggedIn && isAuthorized) {
+      navigate('/');
+    }
+  }, [isLoggedIn, isAuthorized]);
 }
