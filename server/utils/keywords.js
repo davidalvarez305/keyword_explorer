@@ -38,6 +38,7 @@ export const removeDuplicatesAndAppendKeywords = (rows, page) => {
       let kwObj = {};
       kwObj.keyword = rows[i].keys[0];
       kwObj.position = rows[i].position;
+      kwObj.impressions = rows[i].impressions;
       kwObj.page = page;
       keywords.push(kwObj);
     }
