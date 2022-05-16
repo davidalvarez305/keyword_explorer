@@ -21,6 +21,8 @@ import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 import FilterInput from './FilterInput';
 import useFormHook from '../hooks/useFormHook';
 import filterValues from '../utils/filterValues';
+import convertToSpreadsheet from '../utils/convertToSpreadsheet';
+import { CSVDownload } from 'react-csv';
 
 export default function KeywordPositionsTable({
   keywordPositions,
@@ -33,6 +35,7 @@ export default function KeywordPositionsTable({
   const [slicedData, setSlicedData] = useState([
     ...filteredValues.slice(startIndex, startIndex + 100),
   ]);
+  const [toggleDownload, setToggleDownload] = useState(false);
   const pages = extractPages(filteredValues);
   const keywords = extractKeywords(slicedData);
   const matrix = createMatrix(filteredValues, pages, keywords);
@@ -84,6 +87,19 @@ export default function KeywordPositionsTable({
             gap: 2.5,
           }}
         >
+          <Button
+            variant="outline"
+            color="green"
+            onClick={() => setToggleDownload(prev => !prev)}
+          >
+            {'Download As CSV'}
+          </Button>
+          {toggleDownload && (
+            <CSVDownload
+              data={convertToSpreadsheet(keywordPositions)}
+              target="_blank"
+            />
+          )}
           <Button
             variant="outline"
             color="blue"

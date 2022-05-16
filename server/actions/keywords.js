@@ -82,6 +82,7 @@ export const RequestKeywords = async ({
           resolve(data.data.rows);
         })
         .catch((err) => {
+          console.log(err);
           reject(err);
         });
     }, 1000);

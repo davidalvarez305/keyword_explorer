@@ -3,13 +3,12 @@ import React, { useState } from 'react';
 import KeywordPositionsTable from '../components/KeywordPositionsTable';
 import { KEYWORD_POSITIONS_ROUTE } from '../constants';
 import useFetch from '../hooks/useFetch';
-import { data } from '../utils/data';
 import KeywordPositionsForm from '../forms/KeywordPositionsForm';
 
 export default function KeywordPositions() {
   const { makeRequest, isLoading } = useFetch();
   const [toggleTable, setToggleTable] = useState(false);
-  const [keywordPositions, setKeywordPositions] = useState(data);
+  const [keywordPositions, setKeywordPositions] = useState([]);
 
   if (toggleTable) {
     return (
