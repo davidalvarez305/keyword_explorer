@@ -1,5 +1,5 @@
 import axios from "axios";
-import * as config from "../google.json";
+import * as config from "../google.json" assert { type: "json" };
 import { __prod__, REDIRECT_URI } from "../constants.js";
 import { AppDataSource } from "../database/db.js";
 import { UserColumns } from "../models/user.js";
