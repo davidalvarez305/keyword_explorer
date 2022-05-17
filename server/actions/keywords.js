@@ -75,17 +75,22 @@ export const RequestKeywords = async ({
     },
   };
 
+  let keywords = [];
   return new Promise((resolve, reject) => {
-    setTimeout(() => {
-      axios(requestParams)
-        .then((data) => {
-          resolve(data.data.rows);
-        })
-        .catch((err) => {
-          console.log(err);
+    axios(requestParams)
+      .then((data) => {
+        if (data.data.rows) {
+          keywords = [...data.data.rows];
+        }
+        resolve(keywords);
+      })
+      .catch((err) => {
+        console.error(err);
+        if (err.message === "Request failed with status code 403") {
           reject(err);
-        });
-    }, 1000);
+        }
+        resolve(keywords);
+      });
   });
 };
 

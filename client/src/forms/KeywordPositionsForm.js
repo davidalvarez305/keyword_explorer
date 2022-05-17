@@ -23,7 +23,7 @@ export default function KeywordPositionsForm({
         <LargeInputBox
           minH={'50vh'}
           minW={'33vw'}
-          label={'Get keyword positions.'}
+          label={'Separate URLs by commas, spaces, tabs, or new lines.'}
           type={'text'}
           name={'pages'}
         />

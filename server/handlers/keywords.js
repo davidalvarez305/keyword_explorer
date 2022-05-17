@@ -130,13 +130,11 @@ export const GetKeywordPositionsByURL = async (req, res) => {
       .json({ data: "Please include a site in your request." });
   }
 
-  const pagesToCrawl = req.body.pages.split("\n");
   let keywordsArray = [];
-
-  for (let i = 0; i < pagesToCrawl.length; i++) {
+  for (let i = 0; i < req.body.pages.length; i++) {
     const config = {
-      site: extractSiteFromPage(pagesToCrawl[i]),
-      page: pagesToCrawl[i],
+      site: extractSiteFromPage(req.body.pages[i]),
+      page: req.body.pages[i],
       accessToken: req.session.access_token,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
@@ -146,7 +144,7 @@ export const GetKeywordPositionsByURL = async (req, res) => {
       const keywords = await RequestKeywords(config);
       keywordsArray = [
         ...keywordsArray,
-        ...removeDuplicatesAndAppendKeywords(keywords, pagesToCrawl[i]),
+        ...removeDuplicatesAndAppendKeywords(keywords, req.body.pages[i]),
       ];
     } catch (err) {
       return res.status(400).json({ data: err.message });

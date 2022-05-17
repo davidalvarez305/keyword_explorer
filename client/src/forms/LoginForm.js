@@ -1,6 +1,7 @@
 import { Box, Stack, Button } from '@chakra-ui/react';
 import { Form } from 'formik';
 import SimpleInputField from '../components/SimpleInputField';
+import RequestErrorMessage from '../ui/RequestErrorMessage';
 
 export default function LoginForm({ isLoading, loginError }) {
   return (
@@ -31,25 +32,7 @@ export default function LoginForm({ isLoading, loginError }) {
           >
             Submit
           </Button>
-          {loginError.message.length > 0 && (
-            <Box
-              sx={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}
-            >
-              <p
-                style={{
-                  fontFamily: 'Georgia',
-                  color: 'red',
-                  fontSize: 18,
-                }}
-              >
-                {loginError.message}
-              </p>
-            </Box>
-          )}
+          <RequestErrorMessage {...loginError} />
           )
         </Stack>
       </Stack>

@@ -16,7 +16,7 @@ export default function useFetch() {
       withCredentials: true,
       data: config.body ? config.body : null,
       validateStatus: function (status) {
-        return status < 500;
+        return status < 400;
       },
     })
       .then(response => {
