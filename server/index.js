@@ -64,7 +64,7 @@ const index = async () => {
         httpOnly: true,
         secure: __prod__,
         sameSite: "strict",
-        domain: __prod__ ? `.${domain.hostname}` : undefined,
+        domain: __prod__ ? `${domain.hostname.hostname.replace("www.", ".")}` : undefined,
       },
     })
   );
