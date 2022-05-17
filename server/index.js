@@ -48,8 +48,6 @@ const index = async () => {
 
   // Session Configuration
   const domain = new URL(process.env.CLIENT_URL);
-  console.log('hostname: ', domain.hostname)
-  console.log('host: ', domain.host)
   app.use(
     session({
       name: process.env.COOKIE_NAME,

@@ -25,7 +25,7 @@ export const Login = async (req, res) => {
     .then((loginAttempt) => {
       if (loginAttempt.user) {
         req.session.userId = loginAttempt.user.id;
-        const { password, ...user } = loginAttempt.user;
+        const { password, refresh_token, ...user } = loginAttempt.user;
         return res.status(200).json({ data: { user } });
       } else {
         const { error } = loginAttempt;
