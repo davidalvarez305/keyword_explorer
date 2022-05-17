@@ -11,7 +11,7 @@ router.get("/me", Me);
 router.post("/register", restrictedUsers, Register);
 
 // Login
-router.post("/login", restrictedUsers, Login);
+router.post("/login", Login);
 
 // Logout
 router.post("/logout", authRequired, Logout);
