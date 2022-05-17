@@ -63,8 +63,8 @@ const index = async () => {
         maxAge: 1000 * 60 * 60 * 24 * 365 * 10,
         httpOnly: true,
         secure: __prod__,
-        sameSite: "lax",
-        domain: __prod__ ? `${domain.hostname}` : undefined,
+        sameSite: "strict",
+        domain: __prod__ ? `.${domain.hostname}` : undefined,
       },
     })
   );
