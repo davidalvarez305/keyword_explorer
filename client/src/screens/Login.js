@@ -42,7 +42,9 @@ export default function LoginScreen() {
           <Formik
             initialValues={{ username: '', password: '' }}
             onSubmit={values => {
-              console.log('Submitted');
+              if (values.username === '' || values.password === '') {
+                return;
+              }
               makeRequest(
                 {
                   url: LOGIN_ROUTE,

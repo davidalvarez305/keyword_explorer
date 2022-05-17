@@ -40,6 +40,13 @@ export default function Register() {
               email: '',
             }}
             onSubmit={values => {
+              if (
+                values.username === '' ||
+                values.password === '' ||
+                values.email === ''
+              ) {
+                return;
+              }
               makeRequest(
                 {
                   url: REGISTER_ROUTE,

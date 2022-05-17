@@ -25,6 +25,9 @@ export default function KeywordPositions() {
         pages: '',
       }}
       onSubmit={async values => {
+        if (values.pages === '') {
+          return;
+        }
         makeRequest(
           {
             url: KEYWORD_POSITIONS_ROUTE,
