@@ -35,6 +35,7 @@ export default function KeywordPositionsTable({
   const [slicedData, setSlicedData] = useState([
     ...filteredValues.slice(startIndex, startIndex + 100),
   ]);
+  const [hasMore, setHasMore] = useState(() => slicedData.length > 0);
   const [toggleDownload, setToggleDownload] = useState(false);
   const pages = extractPages(filteredValues);
   const keywords = extractKeywords(slicedData);
@@ -42,29 +43,45 @@ export default function KeywordPositionsTable({
 
   const observer = useRef(null);
 
-  const lastElement = useCallback(el => {
-    if (observer.current) observer.current.disconnect();
-    observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) {
-        console.log('seen...');
-        setStartIndex(prev => (prev += 100));
-        setSlicedData(prev => {
-          return [
-            ...prev,
-            ...filteredValues.slice(startIndex, startIndex + 100),
-          ];
-        });
-      }
-    });
-    if (el) observer.current.observe(el);
-  });
+  const lastElement = useCallback(
+    el => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver(entries => {
+        if (entries[0].isIntersecting) {
+          setStartIndex(prev => (prev += 100));
+          setHasMore(
+            filteredValues.slice(startIndex, startIndex + 100).length === 100
+          );
+          if (hasMore) {
+            setSlicedData(prev => {
+              return [
+                ...prev,
+                ...filteredValues.slice(startIndex, startIndex + 100),
+              ];
+            });
+          }
+        }
+      });
+      if (el) observer.current.observe(el);
+    },
+    [hasMore]
+  );
+
+  useEffect(() => {
+    if (hasMore) {
+      setSlicedData(prev => {
+        return [...prev, ...filteredValues.slice(startIndex, startIndex + 100)];
+      });
+    }
+  }, [startIndex]);
 
   useEffect(() => {
     setFilteredValues([...filterValues(keywordPositions, values.filter)]);
+    setStartIndex(0);
     setSlicedData(() => {
       return [...filteredValues.slice(startIndex, startIndex + 100)];
     });
-  }, [values.filter, sortDirection, startIndex]);
+  }, [values.filter, sortDirection]);
 
   return (
     <Box

@@ -72,6 +72,7 @@ export const RequestKeywords = async ({
           ],
         },
       ],
+      rowLimit: 5000,
     },
   };
 
