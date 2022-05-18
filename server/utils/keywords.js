@@ -52,9 +52,10 @@ function parseSERPFeatures(serpFeatures) {
   let ftrs = {};
   let features = serpFeatures.split(",");
   for (let i = 0; i < features.length; i++) {
-    ftrs[SERP_FEATURES[features[i]]] = true;
+    if (SERP_FEATURES[features[i]]) {
+      ftrs[SERP_FEATURES[features[i]]] = true;
+    }
   }
-  console.log(ftrs);
   return ftrs;
 }
 

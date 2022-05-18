@@ -37,6 +37,6 @@ router.post("/positions", googleAuth, GetKeywordPositionsByURL);
 router.get("/sites", googleAuth, GetAccountSites);
 
 // Get URLs of Websites Associated With Account
-router.post("/semrush", authRequired, GetSEMRushKeywordReport);
+router.post("/semrush", GetSEMRushKeywordReport);
 
 export default router;
