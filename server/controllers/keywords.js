@@ -8,7 +8,9 @@ import {
   GetStrikingDistanceKeywords,
   GetAccountSites,
   GetKeywordPositionsByURL,
+  GetSEMRushKeywordReport,
 } from "../handlers/keywords.js";
+import authRequired from "../middleware/authRequired.js";
 import { googleAuth } from "../middleware/googleAuth.js";
 
 const router = express.Router();
@@ -33,5 +35,8 @@ router.post("/positions", googleAuth, GetKeywordPositionsByURL);
 
 // Get URLs of Websites Associated With Account
 router.get("/sites", googleAuth, GetAccountSites);
+
+// Get URLs of Websites Associated With Account
+router.post("/semrush", authRequired, GetSEMRushKeywordReport);
 
 export default router;

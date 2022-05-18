@@ -8,6 +8,7 @@ import {
 import {
   extractSiteFromPage,
   removeDuplicatesAndAppendKeywords,
+  transformSEMRushData,
 } from "../utils/keywords.js";
 
 export const GetKeywordsFromURL = async (req, res) => {
@@ -152,4 +153,37 @@ export const GetKeywordPositionsByURL = async (req, res) => {
   }
 
   return res.status(200).json({ data: keywordsArray });
+};
+
+export const GetSEMRushKeywordReport = async (req, res) => {
+  if (!req.body.page) {
+    return res
+      .status(400)
+      .json({ data: "Please include a page in your request." });
+  }
+
+  const url = `https://api.semrush.com/`;
+  const params = {
+    type: "url_organic",
+    key: process.env.SEMRUSH_API_KEY,
+    url: req.body.page,
+    database: "us",
+    display_limit: 20,
+  };
+
+  axios(
+    url,
+    {
+      method: "GET",
+      params: params,
+    },
+    null
+  )
+    .then((data) => {
+      const rows = transformSEMRushData(data.data);
+      return res.status(200).json({ data: rows });
+    })
+    .catch((err) => {
+      return res.status(400).json({ data: err.message });
+    });
 };

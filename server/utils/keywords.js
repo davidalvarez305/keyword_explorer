@@ -45,3 +45,20 @@ export const removeDuplicatesAndAppendKeywords = (rows, page) => {
   }
   return keywords;
 };
+
+export const transformSEMRushData = (data) => {
+  let rows = [];
+  let arr = data.split("\r\n");
+
+  let headers = arr[0].split(";");
+
+  for (let i = 1; i < arr.length - 1; i++) {
+    let row = arr[i].split(";");
+    let transformed = {};
+    for (let n = 0; n < headers.length; n++) {
+      transformed[headers[n]] = row[n];
+    }
+    rows.push(transformed);
+  }
+  return rows;
+};
