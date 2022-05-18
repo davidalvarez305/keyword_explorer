@@ -1,3 +1,5 @@
+import { SERP_FEATURES } from "../constants.js";
+
 export const FilterStrikingDistanceKeywords = (rows) => {
   let strikingDistance = [];
   for (let i = 0; i < rows.length; i++) {
@@ -46,6 +48,16 @@ export const removeDuplicatesAndAppendKeywords = (rows, page) => {
   return keywords;
 };
 
+function parseSERPFeatures(serpFeatures) {
+  let ftrs = {};
+  let features = serpFeatures.split(",");
+  for (let i = 0; i < features.length; i++) {
+    ftrs[SERP_FEATURES[features[i]]] = true;
+  }
+  console.log(ftrs);
+  return ftrs;
+}
+
 export const transformSEMRushData = (data) => {
   let rows = [];
   let arr = data.split("\r\n");
@@ -57,6 +69,10 @@ export const transformSEMRushData = (data) => {
     let transformed = {};
     for (let n = 0; n < headers.length; n++) {
       transformed[headers[n]] = row[n];
+      if (n === 9) {
+        transformed = { ...transformed, ...parseSERPFeatures(row[n]) };
+        delete transformed["SERP Features"];
+      }
     }
     rows.push(transformed);
   }

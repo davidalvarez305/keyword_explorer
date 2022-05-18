@@ -168,7 +168,7 @@ export const GetSEMRushKeywordReport = async (req, res) => {
     key: process.env.SEMRUSH_API_KEY,
     url: req.body.page,
     database: "us",
-    display_limit: 20,
+    display_limit: req.body.quantity,
   };
 
   axios(
@@ -181,7 +181,7 @@ export const GetSEMRushKeywordReport = async (req, res) => {
   )
     .then((data) => {
       const rows = transformSEMRushData(data.data);
-      return res.status(200).json({ data: rows });
+      return res.status(200).json(rows);
     })
     .catch((err) => {
       return res.status(400).json({ data: err.message });
