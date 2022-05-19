@@ -128,7 +128,6 @@ export const transformBacklinksData = (backlinks) => {
 export const transformBatchComparisonData = (domains) => {
   let rows = [];
   let arr = domains.split("\r\n");
-  console.log(arr);
   let headers = [
     "Target",
     "Target Type",
@@ -145,4 +144,63 @@ export const transformBatchComparisonData = (domains) => {
     rows.push(transformed);
   }
   return rows;
+};
+
+function calculatePercentageOfDA(scores) {
+  let percentages = [];
+  let countBelow40 = 0;
+  for (let i = 0; i < scores.length; i++) {
+    if (scores[i] <= 40) {
+      countBelow40 += 1;
+    }
+  }
+  percentages[0] = countBelow40 / scores.length;
+  percentages[1] = 1 - percentages[0];
+  return percentages;
+}
+
+function getTopAnchorTexts(anchors) {
+  let topAnchors = [];
+  let map = {};
+  for (let i = 0; i < anchors.length; i++) {
+    if (!map[anchors[i]]) {
+      map[anchors[i]] = 1;
+    } else {
+      map[anchors[i]] = map[anchors[i]] += 1;
+    }
+  }
+
+  const sorted = Object.fromEntries(
+    Object.entries(map).sort(([, a], [, b]) => {
+      return b - a;
+    })
+  );
+
+  topAnchors = Object.keys(sorted);
+  return topAnchors.slice(0, 2);
+}
+
+export const transformBacklinksAnchorsReport = (urls) => {
+  let final = [];
+  let rows = [];
+  let arr = urls.split("\r\n");
+  let headers = arr[0].split(";");
+  for (let i = 1; i < arr.length - 1; i++) {
+    let row = arr[i].split(";");
+    let transformed = {};
+    for (let n = 0; n < headers.length; n++) {
+      transformed[headers[n]] = row[n];
+    }
+    rows.push(transformed);
+  }
+
+  let data = {};
+  const topAnchors = getTopAnchorTexts(rows.map((ea) => ea.anchor));
+  const percentages = calculatePercentageOfDA(rows.map((ea) => ea.page_ascore));
+  data["Top Anchor Text 1"] = topAnchors[0];
+  data["Top Anchor Text 2"] = topAnchors[1];
+  data["% of BL < DA 40"] = (percentages[0] * 100).toFixed(2) + "%";
+  data["% of BL > DA 40"] = (percentages[1] * 100).toFixed(2) + "%";
+  final.push(data);
+  return final;
 };

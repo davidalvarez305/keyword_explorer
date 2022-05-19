@@ -8,6 +8,7 @@ import {
   FilterStrikingDistanceKeywords,
   getRandomIndex,
   getTopDomainsFromList,
+  transformBacklinksAnchorsReport,
   transformBacklinksData,
   transformBatchComparisonData,
 } from "../utils/keywords.js";
@@ -229,7 +230,7 @@ export const GetBacklinksReport = async (site, page, accessToken) => {
         }
       }
       const top5Pages = getTopDomainsFromList(rankingDomains).slice(0, 5);
-      const batchComparison = GetBatchComparison(top5Pages);
+      const batchComparison = await GetBatchComparison(top5Pages);
       resolve(batchComparison);
     } catch (err) {
       console.log("Error");
@@ -260,9 +261,53 @@ export const GetBatchComparison = async (targets) => {
       },
       null
     )
-      .then(({ data }) => {
-        resolve(transformBatchComparisonData(data));
+      .then(async ({ data }) => {
+        let results = [];
+        const original = transformBatchComparisonData(data);
+        const final = await GetDomainAnchorsReport(original);
+        for (let i = 0; i < original.length; i++) {
+          original[i] = { ...original[i], ...final[i] };
+          results.push(original[i]);
+        }
+        resolve(results);
       })
       .catch(reject);
+  });
+};
+
+export const GetDomainAnchorsReport = async (urls) => {
+  return new Promise(async (resolve, reject) => {
+    let reportPerDomain = [];
+
+    try {
+      console.log(`Requesting: ${urls.length}`);
+      for (let i = 0; i < urls.length; i++) {
+        let params = {
+          type: "backlinks",
+          key: process.env.SEMRUSH_API_KEY,
+          target: urls[i]["Target"],
+          target_type: urls[i]["Target Type"],
+          export_columns: "page_ascore,anchor,external_num,internal_num",
+          display_limit: urls[i]["No. of Backlinks"],
+        };
+
+        const res = await axios(
+          `https://api.semrush.com/analytics/v1/`,
+          {
+            method: "GET",
+            params: params,
+          },
+          null
+        );
+
+        reportPerDomain = [
+          ...reportPerDomain,
+          ...transformBacklinksAnchorsReport(res.data),
+        ];
+      }
+      resolve(reportPerDomain);
+    } catch (err) {
+      reject(err);
+    }
   });
 };
