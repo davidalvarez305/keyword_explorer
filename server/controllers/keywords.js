@@ -9,6 +9,7 @@ import {
   GetAccountSites,
   GetKeywordPositionsByURL,
   GetSEMRushKeywordReport,
+  GetSEMRushBacklinksReport,
 } from "../handlers/keywords.js";
 import authRequired from "../middleware/authRequired.js";
 import { googleAuth } from "../middleware/googleAuth.js";
@@ -38,5 +39,8 @@ router.get("/sites", googleAuth, GetAccountSites);
 
 // Get URLs of Websites Associated With Account
 router.post("/semrush", authRequired, GetSEMRushKeywordReport);
+
+// Get URLs of Websites Associated With Account
+router.post("/backlinks-report", googleAuth, GetSEMRushBacklinksReport);
 
 export default router;

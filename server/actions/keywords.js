@@ -7,6 +7,9 @@ import {
   extractSiteFromPage,
   FilterStrikingDistanceKeywords,
   getRandomIndex,
+  getTopDomainsFromList,
+  transformBacklinksData,
+  transformBatchComparisonData,
 } from "../utils/keywords.js";
 import * as cheerio from "cheerio";
 import { userAgents } from "../utils/userAgents.js";
@@ -86,7 +89,7 @@ export const RequestKeywords = async ({
         resolve(keywords);
       })
       .catch((err) => {
-        console.error(err);
+        console.error(err.message);
         if (err.message === "Request failed with status code 403") {
           reject(err);
         }
@@ -183,5 +186,83 @@ export const GetPAAFromURL = async (body, accessToken) => {
       }
     }
     resolve(peopleAlsoAskQuestions);
+  });
+};
+
+export const GetBacklinksReport = async (site, page, accessToken) => {
+  return new Promise(async (resolve, reject) => {
+    let rankingDomains = [];
+    try {
+      const strikingDistanceKeywords = await GetStrikingDistanceTerms({
+        site,
+        accessToken,
+        page,
+      });
+
+      console.log(
+        `Length of Striking Distance Keywords: ${strikingDistanceKeywords.length}`
+      );
+
+      for (let i = 0; i < 10; i++) {
+        const res = await axios(
+          `https://api.semrush.com/`,
+          {
+            method: "GET",
+            params: {
+              type: "phrase_organic",
+              key: process.env.SEMRUSH_API_KEY,
+              phrase: strikingDistanceKeywords[i],
+              database: "us",
+              display_limit: 10,
+            },
+          },
+          null
+        );
+        console.log(
+          `Length of rankingDomains for ${strikingDistanceKeywords[i]}: ${res.data.length}`
+        );
+        if (res.data.length > 26) {
+          rankingDomains = [
+            ...rankingDomains,
+            ...transformBacklinksData(res.data),
+          ];
+        }
+      }
+      const top5Pages = getTopDomainsFromList(rankingDomains).slice(0, 5);
+      const batchComparison = GetBatchComparison(top5Pages);
+      resolve(batchComparison);
+    } catch (err) {
+      console.log("Error");
+      reject(err);
+    }
+  });
+};
+
+export const GetBatchComparison = async (targets) => {
+  return new Promise((resolve, reject) => {
+    let params = {
+      type: "backlinks_comparison",
+      key: process.env.SEMRUSH_API_KEY,
+      targets: targets,
+      target_types: [],
+      export_columns: "target,target_type,ascore,backlinks_num,domains_num",
+    };
+
+    for (let i = 0; i < targets.length; i++) {
+      params["target_types"] = [...params["target_types"], "url"];
+    }
+
+    axios(
+      `https://api.semrush.com/analytics/v1/`,
+      {
+        method: "GET",
+        params: params,
+      },
+      null
+    )
+      .then(({ data }) => {
+        resolve(transformBatchComparisonData(data));
+      })
+      .catch(reject);
   });
 };

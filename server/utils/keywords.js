@@ -94,3 +94,55 @@ export const transformSEMRushData = (data) => {
   }
   return rows;
 };
+
+export const getTopDomainsFromList = (listOfDomains) => {
+  let topDomains = [];
+  let map = {};
+  for (let i = 0; i < listOfDomains.length; i++) {
+    if (!map[listOfDomains[i]]) {
+      map[listOfDomains[i]] = 1;
+    } else {
+      map[listOfDomains[i]] = map[listOfDomains[i]] += 1;
+    }
+  }
+
+  const sorted = Object.fromEntries(
+    Object.entries(map).sort(([, a], [, b]) => {
+      return b - a;
+    })
+  );
+
+  topDomains = Object.keys(sorted);
+  return topDomains;
+};
+
+export const transformBacklinksData = (backlinks) => {
+  let rows = [];
+  let arr = backlinks.split("\r\n");
+  for (let i = 1; i < arr.length; i++) {
+    rows.push(arr[i].split(";")[1]);
+  }
+  return rows;
+};
+
+export const transformBatchComparisonData = (domains) => {
+  let rows = [];
+  let arr = domains.split("\r\n");
+  console.log(arr);
+  let headers = [
+    "Target",
+    "Target Type",
+    "Authority Score",
+    "No. of Backlinks",
+    "No. of Referring Domains",
+  ];
+  for (let i = 1; i < arr.length - 1; i++) {
+    let row = arr[i].split(";");
+    let transformed = {};
+    for (let n = 0; n < headers.length; n++) {
+      transformed[headers[n]] = row[n];
+    }
+    rows.push(transformed);
+  }
+  return rows;
+};

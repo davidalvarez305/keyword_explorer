@@ -4,6 +4,7 @@ import {
   RequestKeywords,
   GetPAAFromURL,
   GetStrikingDistanceTerms,
+  GetBacklinksReport,
 } from "../actions/keywords.js";
 import {
   extractSiteFromPage,
@@ -182,6 +183,26 @@ export const GetSEMRushKeywordReport = async (req, res) => {
     .then((data) => {
       const rows = transformSEMRushData(data.data);
       return res.status(200).json(rows);
+    })
+    .catch((err) => {
+      return res.status(400).json({ data: err.message });
+    });
+};
+
+export const GetSEMRushBacklinksReport = async (req, res) => {
+  if (!req.body.page) {
+    return res
+      .status(400)
+      .json({ data: "Please include a page in your request." });
+  }
+
+  GetBacklinksReport(
+    extractSiteFromPage(req.body.page),
+    req.body.page,
+    req.session.access_token
+  )
+    .then((data) => {
+      return res.status(200).json({ data });
     })
     .catch((err) => {
       return res.status(400).json({ data: err.message });
