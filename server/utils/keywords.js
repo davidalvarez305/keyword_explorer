@@ -2,9 +2,32 @@ import { COMMON_THEMES, SERP_FEATURES } from "../constants.js";
 
 export const FilterStrikingDistanceKeywords = (rows) => {
   let strikingDistance = [];
-  for (let i = 0; i < rows.length; i++) {
-    if (rows[i].position <= 15 && rows[i].position >= 6) {
-      strikingDistance.push(rows[i].keys[0]);
+  console.log(rows.length);
+  if (rows.length < 1500) {
+    for (let i = 0; i < rows.length; i++) {
+      if (rows[i].position <= 15 && rows[i].position >= 6) {
+        strikingDistance.push(rows[i].keys[0]);
+      }
+    }
+  } else if (rows.length > 3000) {
+    for (let i = 0; i < rows.length; i++) {
+      if (
+        rows[i].position <= 15 &&
+        rows[i].position >= 6 &&
+        rows[i].impressions >= 300
+      ) {
+        strikingDistance.push(rows[i].keys[0]);
+      }
+    }
+  } else {
+    for (let i = 0; i < rows.length; i++) {
+      if (
+        rows[i].position <= 15 &&
+        rows[i].position >= 6 &&
+        rows[i].impressions >= 175
+      ) {
+        strikingDistance.push(rows[i].keys[0]);
+      }
     }
   }
   return strikingDistance;
