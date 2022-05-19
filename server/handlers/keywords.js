@@ -202,7 +202,7 @@ export const GetSEMRushBacklinksReport = async (req, res) => {
     req.session.access_token
   )
     .then((data) => {
-      return res.status(200).json({ data });
+      return res.status(200).json(data);
     })
     .catch((err) => {
       return res.status(400).json({ data: err.message });
