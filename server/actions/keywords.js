@@ -204,7 +204,7 @@ export const GetBacklinksReport = async (site, page, accessToken) => {
         `Length of Striking Distance Keywords: ${strikingDistanceKeywords.length}`
       );
 
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < strikingDistanceKeywords.length; i++) {
         const res = await axios(
           `https://api.semrush.com/`,
           {
