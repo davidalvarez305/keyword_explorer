@@ -1,4 +1,4 @@
-import { SERP_FEATURES } from "../constants.js";
+import { COMMON_THEMES, SERP_FEATURES } from "../constants.js";
 
 export const FilterStrikingDistanceKeywords = (rows) => {
   let strikingDistance = [];
@@ -59,7 +59,20 @@ function parseSERPFeatures(serpFeatures) {
   return ftrs;
 }
 
+function identifyTheme(keyword) {
+  let theme = { Theme: "" };
+  let i = 0;
+  while (theme.Theme === "") {
+    if (keyword.includes(COMMON_THEMES[i])) {
+      theme.Theme = COMMON_THEMES[i];
+    }
+    i++;
+  }
+  return theme;
+}
+
 export const transformSEMRushData = (data) => {
+  console.log(data);
   let rows = [];
   let arr = data.split("\r\n");
 
@@ -70,6 +83,9 @@ export const transformSEMRushData = (data) => {
     let transformed = {};
     for (let n = 0; n < headers.length; n++) {
       transformed[headers[n]] = row[n];
+      if (n === 0) {
+        transformed = { ...transformed, ...identifyTheme(row[n]) };
+      }
       if (n === 9) {
         transformed = { ...transformed, ...parseSERPFeatures(row[n]) };
         delete transformed["SERP Features"];
