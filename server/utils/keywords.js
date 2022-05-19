@@ -61,18 +61,16 @@ function parseSERPFeatures(serpFeatures) {
 
 function identifyTheme(keyword) {
   let theme = { Theme: "" };
-  let i = 0;
-  while (theme.Theme === "") {
+  for (let i = 0; i < COMMON_THEMES.length; i++) {
     if (keyword.includes(COMMON_THEMES[i])) {
       theme.Theme = COMMON_THEMES[i];
+      return theme;
     }
-    i++;
   }
   return theme;
 }
 
 export const transformSEMRushData = (data) => {
-  console.log(data);
   let rows = [];
   let arr = data.split("\r\n");
 
@@ -89,6 +87,7 @@ export const transformSEMRushData = (data) => {
       if (n === 9) {
         transformed = { ...transformed, ...parseSERPFeatures(row[n]) };
         delete transformed["SERP Features"];
+        delete transformed["Trends"];
       }
     }
     rows.push(transformed);
