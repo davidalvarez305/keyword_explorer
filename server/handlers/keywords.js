@@ -7,6 +7,7 @@ import {
   GetBacklinksReport,
 } from "../actions/keywords.js";
 import {
+  createPeopleAlsoAskReport,
   extractQuestions,
   extractSiteFromPage,
   removeDuplicatesAndAppendKeywords,
@@ -63,16 +64,42 @@ export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
   if (!req.body.pages) {
     return res
       .status(400)
-      .json({ data: "Please include a keyword in the request." });
+      .json({ data: "Please include pages in the request." });
+  }
+  const pages = [req.body.pages]
+
+  let strikingDistanceKeywords = [];
+  for (let i = 0; i < pages.length; i++) {
+    const config = {
+      site: extractSiteFromPage(pages[i]),
+      page:  pages[i],
+      accessToken: req.session.access_token,
+      startDate: req.body.startDate,
+      endDate: req.body.endDate,
+    };
+
+    try {
+      const extractedKeywords = await GetStrikingDistanceTerms(config);
+      strikingDistanceKeywords = [...strikingDistanceKeywords, ...extractedKeywords];
+    } catch (err) {
+      console.log(err.message);
+      reject(err);
+    }
   }
 
-  GetPAAFromURL(req.body, req.session.access_token)
-    .then((data) => {
-      return res.status(200).json({ data });
-    })
-    .catch((err) => {
+  let peopleAlsoAskQuestions = [];
+  for (let i = 0; i < 1; i++) {
+    try {
+      const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
+      const peopleAlsoAsk = await extractQuestions(questions.related_questions);
+      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
+    } catch (err) {
       return res.status(400).json({ data: err.message });
-    });
+    }
+  }
+
+  const data = createPeopleAlsoAskReport(peopleAlsoAskQuestions)
+  return res.status(200).json({ data });
 };
 
 export const GetLowPickingsKeywords = async (req, res) => {

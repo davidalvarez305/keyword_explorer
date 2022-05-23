@@ -1,3 +1,4 @@
+import { GetKeywordMSV } from "../actions/keywords.js";
 import { COMMON_THEMES, SERP_FEATURES } from "../constants.js";
 
 export const FilterStrikingDistanceKeywords = (rows) => {
@@ -11,12 +12,13 @@ export const FilterStrikingDistanceKeywords = (rows) => {
   return strikingDistance;
 };
 
-export const extractQuestions = (arr) => {
+export const extractQuestions = async (arr) => {
   let cleanedQuestions = [];
 
   for (let i = 0; i < arr.length; i++) {
     let obj = {};
     obj["PAA"] = arr[i].question;
+    obj["MSV"] = await GetKeywordMSV(arr[i].question);
     obj["URL That Owns It"] = arr[i].link;
     obj["Ranking Text"] = arr[i].snippet;
     obj["Header"] = arr[i].title;
@@ -210,4 +212,46 @@ export const transformBacklinksAnchorsReport = (urls) => {
   data["% of BL > DA 40"] = (percentages[1] * 100).toFixed(2) + "%";
   final.push(data);
   return final;
+};
+
+function isPAAIncluded(arr, key) {
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i]["PAA"] === key) {
+      return true;
+    }
+  }
+  return false;
+}
+
+export const createPeopleAlsoAskReport = (data) => {
+  let results = [];
+  for (let i = 0; i < data.length; i++) {
+    let obj = { ...data[i], Repeats: 0 };
+    for (let j = 0; j < data.length; j++) {
+      if (data[i]["PAA"] === data[j]["PAA"]) {
+        obj.Repeats += 1;
+      }
+    }
+    if (!isPAAIncluded(results, obj["PAA"])) {
+      results.push(obj);
+    }
+  }
+  return results;
+};
+
+export const transformSEMRushMSVData = (data) => {
+  if (data.includes("ERROR 50 :: NOTHING FOUND")) {
+    return { "Search Volume": 0 };
+  }
+
+  let transformed = {};
+  let arr = data.split("\r\n");
+  let headers = arr[0].split(";");
+  for (let i = 1; i <= arr.length - 1; i++) {
+    let row = arr[i].split(";");
+    for (let n = 0; n < headers.length; n++) {
+      transformed[headers[n]] = row[n];
+    }
+  }
+  return transformed;
 };

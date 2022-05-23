@@ -11,6 +11,7 @@ import {
   transformBacklinksAnchorsReport,
   transformBacklinksData,
   transformBatchComparisonData,
+  transformSEMRushMSVData,
 } from "../utils/keywords.js";
 import * as cheerio from "cheerio";
 import { userAgents } from "../utils/userAgents.js";
@@ -295,6 +296,33 @@ export const GetDomainAnchorsReport = async (urls) => {
         ];
       }
       resolve(reportPerDomain);
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
+export const GetKeywordMSV = async (keyword) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let params = {
+        type: "phrase_these",
+        key: process.env.SEMRUSH_API_KEY,
+        phrase: keyword,
+        database: "us",
+        export_columns: "Ph,Nq",
+      };
+
+      const res = await axios(
+        `https://api.semrush.com/`,
+        {
+          method: "GET",
+          params: params,
+        },
+        null
+      );
+      const msv = transformSEMRushMSVData(res.data);
+      resolve(msv["Search Volume"]);
     } catch (err) {
       reject(err);
     }
