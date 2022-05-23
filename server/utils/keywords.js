@@ -1,33 +1,11 @@
 import { COMMON_THEMES, SERP_FEATURES } from "../constants.js";
 
 export const FilterStrikingDistanceKeywords = (rows) => {
+  const sorted = rows.sort((a, b) => b.impressions - a.impressions);
   let strikingDistance = [];
-  console.log(rows.length);
-  if (rows.length < 1500) {
-    for (let i = 0; i < rows.length; i++) {
-      if (rows[i].position <= 15 && rows[i].position >= 6) {
-        strikingDistance.push(rows[i].keys[0]);
-      }
-    }
-  } else if (rows.length > 3000) {
-    for (let i = 0; i < rows.length; i++) {
-      if (
-        rows[i].position <= 15 &&
-        rows[i].position >= 6 &&
-        rows[i].impressions >= 300
-      ) {
-        strikingDistance.push(rows[i].keys[0]);
-      }
-    }
-  } else {
-    for (let i = 0; i < rows.length; i++) {
-      if (
-        rows[i].position <= 15 &&
-        rows[i].position >= 6 &&
-        rows[i].impressions >= 175
-      ) {
-        strikingDistance.push(rows[i].keys[0]);
-      }
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].position <= 15 && sorted[i].position >= 6) {
+      strikingDistance.push(sorted[i].keys[0]);
     }
   }
   return strikingDistance;
@@ -35,10 +13,16 @@ export const FilterStrikingDistanceKeywords = (rows) => {
 
 export const extractQuestions = (arr) => {
   let cleanedQuestions = [];
+
   for (let i = 0; i < arr.length; i++) {
-    const q = arr[i].split("Search for: ")[1];
-    cleanedQuestions.push(q);
+    let obj = {};
+    obj["PAA"] = arr[i].question;
+    obj["URL That Owns It"] = arr[i].link;
+    obj["Ranking Text"] = arr[i].snippet;
+    obj["Header"] = arr[i].title;
+    cleanedQuestions.push(obj);
   }
+
   return cleanedQuestions;
 };
 

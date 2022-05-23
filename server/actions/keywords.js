@@ -120,36 +120,23 @@ export const GetStrikingDistanceTerms = async ({
 };
 
 export const CrawlGoogleSERP = async (keyword) => {
-  const search = keyword.split(" ").join("+");
-  const SERP = `https://www.google.com/search?q=${search}`;
-
-  return new Promise(async (resolve, reject) => {
-    try {
-      const sessionId = (1000000 * Math.random()) | 0;
-      const { data } = await axios2.get(SERP, {
-        headers: {
-          "User-Agent": userAgents[getRandomIndex(userAgents.length)],
-        },
-        proxy: {
-          host: process.env.P_HOST,
-          port: process.env.P_PORT,
-          auth: {
-            username: process.env.P_USERNAME + sessionId,
-            password: process.env.P_PASSWORD,
-          },
-        },
-      });
-      const $ = cheerio.load(data);
-      const box = $(".ULSxyf").text();
-      let questions = [];
-      const crawledQuestions = box.match(/Search for: [a-zA-Z ']+/gm);
-      if (crawledQuestions) {
-        questions = [...crawledQuestions];
-      }
-      resolve(extractQuestions(questions));
-    } catch (err) {
-      reject(err);
-    }
+  return new Promise((resolve, reject) => {
+    const SERP = process.env.SERP_API;
+    axios({
+      url: SERP,
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+      params: {
+        q: keyword,
+        engine: "google",
+        api_key: process.env.SERP_API_KEY,
+        device: "mobile",
+      },
+    })
+      .then((data) => {
+        resolve(data.data);
+      })
+      .catch(reject);
   });
 };
 
@@ -204,7 +191,8 @@ export const GetBacklinksReport = async (site, page, accessToken) => {
         `Length of Striking Distance Keywords: ${strikingDistanceKeywords.length}`
       );
 
-      for (let i = 0; i < strikingDistanceKeywords.length; i++) {
+      const selectedKeywords = strikingDistanceKeywords.slice(0, 80);
+      for (let i = 0; i < selectedKeywords.length; i++) {
         const res = await axios(
           `https://api.semrush.com/`,
           {

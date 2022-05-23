@@ -7,6 +7,7 @@ import {
   GetBacklinksReport,
 } from "../actions/keywords.js";
 import {
+  extractQuestions,
   extractSiteFromPage,
   removeDuplicatesAndAppendKeywords,
   transformSEMRushData,
@@ -49,7 +50,8 @@ export const GetPeopleAlsoAskQuestionsByKeywords = async (req, res) => {
   for (let i = 0; i < searchTerms.length; i++) {
     try {
       const questions = await CrawlGoogleSERP(searchTerms[i]);
-      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...questions];
+      const peopleAlsoAsk = extractQuestions(questions.related_questions);
+      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
     } catch (err) {
       return res.status(400).json({ data: err.message });
     }
