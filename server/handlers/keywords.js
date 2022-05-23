@@ -88,7 +88,7 @@ export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
   }
 
   let peopleAlsoAskQuestions = [];
-  for (let i = 0; i < 1; i++) {
+  for (let i = 0; i < strikingDistanceKeywords.length; i++) {
     try {
       const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
       const peopleAlsoAsk = await extractQuestions(questions.related_questions);
