@@ -10,6 +10,8 @@ import {
   GetKeywordPositionsByURL,
   GetSEMRushKeywordReport,
   GetSEMRushBacklinksReport,
+  GetFeaturedSnippetsByKeyword,
+  GetSERPVideosByKeyword,
 } from "../handlers/keywords.js";
 import authRequired from "../middleware/authRequired.js";
 import { googleAuth } from "../middleware/googleAuth.js";
@@ -42,5 +44,11 @@ router.post("/semrush", authRequired, GetSEMRushKeywordReport);
 
 // Get URLs of Websites Associated With Account
 router.post("/backlinks-report", googleAuth, GetSEMRushBacklinksReport);
+
+// Get URLs of Websites Associated With Account
+router.post("/featured-snippets", authRequired, GetFeaturedSnippetsByKeyword);
+
+// Get URLs of Websites Associated With Account
+router.post("/featured-videos", authRequired, GetSERPVideosByKeyword);
 
 export default router;

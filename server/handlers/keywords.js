@@ -5,6 +5,7 @@ import {
   GetPAAFromURL,
   GetStrikingDistanceTerms,
   GetBacklinksReport,
+  GetKeywordMSV,
 } from "../actions/keywords.js";
 import {
   createPeopleAlsoAskReport,
@@ -66,13 +67,13 @@ export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
       .status(400)
       .json({ data: "Please include pages in the request." });
   }
-  const pages = [req.body.pages]
+  const pages = req.body.pages.split("\n");
 
   let strikingDistanceKeywords = [];
   for (let i = 0; i < pages.length; i++) {
     const config = {
       site: extractSiteFromPage(pages[i]),
-      page:  pages[i],
+      page: pages[i],
       accessToken: req.session.access_token,
       startDate: req.body.startDate,
       endDate: req.body.endDate,
@@ -80,7 +81,10 @@ export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
 
     try {
       const extractedKeywords = await GetStrikingDistanceTerms(config);
-      strikingDistanceKeywords = [...strikingDistanceKeywords, ...extractedKeywords];
+      strikingDistanceKeywords = [
+        ...strikingDistanceKeywords,
+        ...extractedKeywords,
+      ];
     } catch (err) {
       console.log(err.message);
       reject(err);
@@ -98,7 +102,7 @@ export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
     }
   }
 
-  const data = createPeopleAlsoAskReport(peopleAlsoAskQuestions)
+  const data = createPeopleAlsoAskReport(peopleAlsoAskQuestions);
   return res.status(200).json({ data });
 };
 
@@ -236,4 +240,60 @@ export const GetSEMRushBacklinksReport = async (req, res) => {
     .catch((err) => {
       return res.status(400).json({ data: err.message });
     });
+};
+
+export const GetFeaturedSnippetsByKeyword = async (req, res) => {
+  if (!req.body.keywords) {
+    return res
+      .status(400)
+      .json({ data: "Please include keywords in your request." });
+  }
+
+  const keywords = req.body.keywords.split("\n");
+
+  let featuredSnippets = [];
+  try {
+    for (let i = 0; i < keywords.length; i++) {
+      let obj = {};
+      const serp = await CrawlGoogleSERP(keywords[i]);
+      obj["Keyword"] = keywords[i];
+      obj["MSV"] = await GetKeywordMSV(keywords[i]);
+      obj["URL That Owns It"] = serp.answer_box.link;
+      obj["Ranking Text"] = serp.answer_box.snippet;
+      featuredSnippets.push(obj);
+    }
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
+  }
+  return res.status(200).json({ data: featuredSnippets });
+};
+
+export const GetSERPVideosByKeyword = async (req, res) => {
+  if (!req.body.keywords) {
+    return res
+      .status(400)
+      .json({ data: "Please include keywords in your request." });
+  }
+
+  const keywords = req.body.keywords.split("\n");
+
+  let videoSnippets = [];
+  try {
+    for (let i = 0; i < keywords.length; i++) {
+      const serp = await CrawlGoogleSERP(keywords[i]);
+      for (let j = 0; j < serp.organic_results.length; j++) {
+        if (serp.organic_results[j].link.includes("youtube.com")) {
+          let obj = {};
+          obj["Keyword"] = keywords[i];
+          obj["MSV"] = await GetKeywordMSV(keywords[i]);
+          obj["URL That Owns It"] = serp.organic_results[j].link;
+          obj["Title"] = serp.organic_results[j].title;
+          videoSnippets.push(obj);
+        }
+      }
+    }
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
+  }
+  return res.status(200).json({ data: videoSnippets });
 };
