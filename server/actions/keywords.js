@@ -168,7 +168,8 @@ export const GetPAAFromURL = async (body, accessToken) => {
     for (let i = 0; i < keywords.length; i++) {
       try {
         const questions = await CrawlGoogleSERP(keywords[i]);
-        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...questions];
+        const peopleAlsoAsk = extractQuestions(questions.related_questions);
+        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
       } catch (err) {
         reject(err);
       }
