@@ -3,18 +3,17 @@ import axios2 from "axios-https-proxy-fix";
 import "dotenv/config";
 import {
   calculateDateDifference,
+  createPeopleAlsoAskReport,
   extractQuestions,
   extractSiteFromPage,
   FilterStrikingDistanceKeywords,
-  getRandomIndex,
   getTopDomainsFromList,
   transformBacklinksAnchorsReport,
   transformBacklinksData,
   transformBatchComparisonData,
   transformSEMRushMSVData,
 } from "../utils/keywords.js";
-import * as cheerio from "cheerio";
-import { userAgents } from "../utils/userAgents.js";
+import xlsx from "xlsx";
 
 export const QueryGoogleKeywordPlanner = (query, token) => {
   const route = `https://googleads.googleapis.com/v10/customers/${GOOGLE_CUSTOMER_ID}:generateKeywordIdeas`;
@@ -327,4 +326,89 @@ export const GetKeywordMSV = async (keyword) => {
       reject(err);
     }
   });
+};
+
+export const GetPeopleAlsoAskQuestionsByKeywords = async (searchTerms) => {
+  return new Promise(async (resolve, reject) => {
+    let peopleAlsoAskQuestions = [];
+    for (let i = 0; i < searchTerms.length; i++) {
+      try {
+        const questions = await CrawlGoogleSERP(searchTerms[i]);
+        const peopleAlsoAsk = await extractQuestions(
+          questions.related_questions
+        );
+        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
+      } catch (err) {
+        reject(err);
+      }
+    }
+    resolve(peopleAlsoAskQuestions);
+  });
+};
+
+export const GetPeopleAlsoAskQuestionsByURL = async (pages) => {
+  return new Promise(async (resolve, reject) => {
+    let strikingDistanceKeywords = [];
+    for (let i = 0; i < pages.length; i++) {
+      const config = {
+        site: extractSiteFromPage(pages[i]),
+        page: pages[i],
+        accessToken: req.session.access_token,
+        startDate: req.body.startDate,
+        endDate: req.body.endDate,
+      };
+
+      try {
+        const extractedKeywords = await GetStrikingDistanceTerms(config);
+        strikingDistanceKeywords = [
+          ...strikingDistanceKeywords,
+          ...extractedKeywords,
+        ];
+      } catch (err) {
+        reject(err);
+      }
+    }
+
+    let peopleAlsoAskQuestions = [];
+    for (let i = 0; i < strikingDistanceKeywords.length; i++) {
+      try {
+        const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
+        const peopleAlsoAsk = await extractQuestions(
+          questions.related_questions
+        );
+        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
+      } catch (err) {
+        reject(err);
+      }
+    }
+
+    const data = createPeopleAlsoAskReport(peopleAlsoAskQuestions);
+    resolve(data);
+  });
+};
+
+export const GetStrikingDistanceKeywords = async ({
+  site,
+  accessToken,
+  page,
+  startDate,
+  endDate,
+}) => {};
+
+export const GenerateWorkbook = (data) => {
+  const wb = xlsx.utils.book_new();
+
+  let sheets = [];
+
+  for (let i = 0; i < data.length; i++) {
+    let obj = {};
+    obj.keyword = data[i];
+    sheets.push(obj);
+  }
+
+  const ws = xlsx.utils.json_to_sheet(sheets);
+  xlsx.utils.book_append_sheet(wb, ws, "Test");
+
+  xlsx.writeFile(wb, "test.xlsx");
+  return true;
 };

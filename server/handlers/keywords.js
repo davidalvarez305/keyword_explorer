@@ -6,6 +6,9 @@ import {
   GetStrikingDistanceTerms,
   GetBacklinksReport,
   GetKeywordMSV,
+  GenerateWorkbook,
+  GetPeopleAlsoAskQuestionsByKeywords,
+  GetPeopleAlsoAskQuestionsByURL,
 } from "../actions/keywords.js";
 import {
   createPeopleAlsoAskReport,
@@ -30,87 +33,47 @@ export const GetKeywordsFromURL = async (req, res) => {
     endDate: req.body.endDate,
   };
 
-  RequestKeywords(config)
-    .then((keywords) => {
-      return res.status(200).json({ data: keywords });
-    })
-    .catch((err) => {
-      return res.status(400).json({ data: err.message });
-    });
+  try {
+    const data = await RequestKeywords(config);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
+  }
 };
 
-export const GetPeopleAlsoAskQuestionsByKeywords = async (req, res) => {
-  if (!req.body.keywords) {
+export const PeopleAlsoAskByKeywords = async (req, res) => {
+  if (!req.query.keywords) {
     return res
       .status(400)
       .json({ data: "Please include a keyword in the request." });
   }
+  const searchTerms = req.query.keywords.split("\n");
 
-  const searchTerms = req.body.keywords.split("\n");
-
-  let peopleAlsoAskQuestions = [];
-  for (let i = 0; i < searchTerms.length; i++) {
-    try {
-      const questions = await CrawlGoogleSERP(searchTerms[i]);
-      const peopleAlsoAsk = extractQuestions(questions.related_questions);
-      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
-    } catch (err) {
-      return res.status(400).json({ data: err.message });
-    }
+  try {
+    const data = await GetPeopleAlsoAskQuestionsByKeywords(searchTerms);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
   }
-  return res.status(200).json({ data: peopleAlsoAskQuestions });
 };
 
-export const GetPeopleAlsoAskQuestionsByURL = async (req, res) => {
-  if (!req.body.pages) {
+export const PeopleAlsoAskByURL = async (req, res) => {
+  if (!req.query.pages) {
     return res
       .status(400)
       .json({ data: "Please include pages in the request." });
   }
-  const pages = req.body.pages.split("\n");
+  const pages = req.query.pages.split("\n");
 
-  let strikingDistanceKeywords = [];
-  for (let i = 0; i < pages.length; i++) {
-    const config = {
-      site: extractSiteFromPage(pages[i]),
-      page: pages[i],
-      accessToken: req.session.access_token,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-    };
-
-    try {
-      const extractedKeywords = await GetStrikingDistanceTerms(config);
-      strikingDistanceKeywords = [
-        ...strikingDistanceKeywords,
-        ...extractedKeywords,
-      ];
-    } catch (err) {
-      console.log(err.message);
-      reject(err);
-    }
+  try {
+    const data = await GetPeopleAlsoAskQuestionsByURL(pages);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
   }
-
-  let peopleAlsoAskQuestions = [];
-  for (let i = 0; i < strikingDistanceKeywords.length; i++) {
-    try {
-      const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
-      const peopleAlsoAsk = await extractQuestions(questions.related_questions);
-      peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
-    } catch (err) {
-      return res.status(400).json({ data: err.message });
-    }
-  }
-
-  const data = createPeopleAlsoAskReport(peopleAlsoAskQuestions);
-  return res.status(200).json({ data });
 };
 
-export const GetLowPickingsKeywords = async (req, res) => {
-  return res.status(200).json({ data: "hey there!" });
-};
-
-export const GetStrikingDistanceKeywords = async (req, res) => {
+export const StrikingDistance = async (req, res) => {
   if (!req.body.pages) {
     return res
       .status(400)
@@ -132,29 +95,11 @@ export const GetStrikingDistanceKeywords = async (req, res) => {
     try {
       const keywords = await GetStrikingDistanceTerms(config);
       strikingDistanceKeywords = [...strikingDistanceKeywords, ...keywords];
+      GenerateWorkbook(strikingDistanceKeywords);
       return res.status(200).json({ data: strikingDistanceKeywords });
     } catch (err) {
       return res.status(500).json({ data: err.message });
     }
-  }
-};
-
-export const GetAccountSites = async (req, res) => {
-  const requestParams = {
-    url: `https://searchconsole.googleapis.com/webmasters/v3/sites/`,
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${req.session.access_token}`,
-      Accept: "application/json",
-    },
-  };
-
-  try {
-    const { data } = await axios(requestParams);
-    return res.status(200).json({ data });
-  } catch (err) {
-    return res.status(400).json({ data: err.message });
   }
 };
 
@@ -296,4 +241,10 @@ export const GetSERPVideosByKeyword = async (req, res) => {
     return res.status(400).json({ data: err.message });
   }
   return res.status(200).json({ data: videoSnippets });
+};
+
+export const GeneratePageReport = async (req, res) => {
+  console.log(req);
+  const page = req.query.page;
+  return res.status(200).json({ data: page });
 };

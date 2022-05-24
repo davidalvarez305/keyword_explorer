@@ -2,16 +2,15 @@ import express from "express";
 
 import {
   GetKeywordsFromURL,
-  GetPeopleAlsoAskQuestionsByKeywords,
-  GetPeopleAlsoAskQuestionsByURL,
-  GetLowPickingsKeywords,
-  GetStrikingDistanceKeywords,
-  GetAccountSites,
+  PeopleAlsoAskByKeywords,
+  PeopleAlsoAskByURL,
+  StrikingDistance,
   GetKeywordPositionsByURL,
   GetSEMRushKeywordReport,
   GetSEMRushBacklinksReport,
   GetFeaturedSnippetsByKeyword,
   GetSERPVideosByKeyword,
+  GeneratePageReport,
 } from "../handlers/keywords.js";
 import authRequired from "../middleware/authRequired.js";
 import { googleAuth } from "../middleware/googleAuth.js";
@@ -22,22 +21,16 @@ const router = express.Router();
 router.post("/", googleAuth, GetKeywordsFromURL);
 
 // Get PAA Questions by Keywords
-router.post("/questions", googleAuth, GetPeopleAlsoAskQuestionsByKeywords);
+router.get("/paa-keywirds", googleAuth, PeopleAlsoAskByKeywords);
 
 // Get PAA Questions By URL
-router.post("/many-questions", googleAuth, GetPeopleAlsoAskQuestionsByURL);
-
-// Get "Low Pickings" Keywords From URL
-router.post("/low-pickings", googleAuth, GetLowPickingsKeywords);
+router.get("/paa-url", googleAuth, PeopleAlsoAskByURL);
 
 // Get Striking Distance Keywords From URL
-router.post("/striking-distance", googleAuth, GetStrikingDistanceKeywords);
+router.post("/striking-distance", googleAuth, StrikingDistance);
 
 // Get Keyword Positions By URL
 router.post("/positions", googleAuth, GetKeywordPositionsByURL);
-
-// Get URLs of Websites Associated With Account
-router.get("/sites", googleAuth, GetAccountSites);
 
 // Get URLs of Websites Associated With Account
 router.post("/semrush", authRequired, GetSEMRushKeywordReport);
@@ -50,5 +43,8 @@ router.post("/featured-snippets", authRequired, GetFeaturedSnippetsByKeyword);
 
 // Get URLs of Websites Associated With Account
 router.post("/featured-videos", authRequired, GetSERPVideosByKeyword);
+
+// Get URLs of Websites Associated With Account
+router.get("/generate-report", authRequired, GeneratePageReport);
 
 export default router;
