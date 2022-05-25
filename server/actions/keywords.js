@@ -127,6 +127,7 @@ export const GetKeywordPositionsByURL = (pages, reqConfig) => {
   });
 };
 export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
+  console.log("reqConfig: ", reqConfig);
   const pagesToCrawl = pages.split("\n");
   return new Promise(async (resolve, reject) => {
     let strikingDistanceKeywords = [];
@@ -135,7 +136,7 @@ export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
       const config = {
         site: extractSiteFromPage(pagesToCrawl[i]),
         page: pagesToCrawl[i],
-        accessToken: reqConfig.access_token,
+        accessToken: reqConfig.accessToken,
         startDate: reqConfig.startDate,
         endDate: reqConfig.endDate,
       };
@@ -407,13 +408,18 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
     }
 
     let peopleAlsoAskQuestions = [];
-    for (let i = 0; i < 2; i++) {
+    for (let i = 0; i < 10; i++) {
       try {
         const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
-        const peopleAlsoAsk = await extractQuestions(
-          questions.related_questions
-        );
-        peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
+        if (questions.related_questions) {
+          const peopleAlsoAsk = await extractQuestions(
+            questions.related_questions
+          );
+          peopleAlsoAskQuestions = [
+            ...peopleAlsoAskQuestions,
+            ...peopleAlsoAsk,
+          ];
+        }
       } catch (err) {
         reject(err);
       }
@@ -456,7 +462,7 @@ export const GetFeaturedSnippetsByKeyword = async (keywords) => {
   return new Promise(async (resolve, reject) => {
     let featuredSnippets = [];
     try {
-      for (let i = 0; i < 2; i++) {
+      for (let i = 0; i < 10; i++) {
         let obj = {};
         const serp = await CrawlGoogleSERP(keywordList[i]);
         if (serp.answer_box) {

@@ -196,7 +196,7 @@ export const GeneratePageReport = async (req, res) => {
     xlsx.utils.book_append_sheet(workbook, universalResults, "Test");
 
     // PAA
-    // Limiting to 5 keywords for now
+    // Limiting to 10 keywords for now
     const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
     const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
     xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
@@ -205,9 +205,10 @@ export const GeneratePageReport = async (req, res) => {
       page,
       reqConfig
     );
+    console.log("strikingDistanceKeywords: ", strikingDistanceKeywords);
 
     // Featured Snippets
-    // Limiting to 5 keywords for now
+    // Limiting to 10 keywords for now
     const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
       strikingDistanceKeywords.join("\n")
     );
