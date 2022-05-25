@@ -45,7 +45,7 @@ export const QueryGoogleKeywordPlanner = (query, token) => {
 
 export const RequestKeywords = async ({
   site,
-  accessToken,
+  access_token,
   page,
   startDate,
   endDate,
@@ -59,7 +59,7 @@ export const RequestKeywords = async ({
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${access_token}`,
       Accept: "application/json",
     },
     data: {
@@ -108,7 +108,7 @@ export const GetKeywordPositionsByURL = (pages, reqConfig) => {
       const config = {
         site: extractSiteFromPage(pageList[i]),
         page: pageList[i],
-        accessToken: reqConfig.access_token,
+        access_token: reqConfig.access_token,
         startDate: reqConfig.startDate,
         endDate: reqConfig.endDate,
       };
@@ -136,7 +136,7 @@ export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
       const config = {
         site: extractSiteFromPage(pagesToCrawl[i]),
         page: pagesToCrawl[i],
-        accessToken: reqConfig.accessToken,
+        access_token: reqConfig.access_token,
         startDate: reqConfig.startDate,
         endDate: reqConfig.endDate,
       };
@@ -174,7 +174,7 @@ export const CrawlGoogleSERP = async (keyword) => {
   });
 };
 
-export const GetPAAFromURL = async (body, accessToken) => {
+export const GetPAAFromURL = async (body, access_token) => {
   return new Promise(async (resolve, reject) => {
     const pagesToCrawl = body.pages.split("\n");
     let keywords = [];
@@ -183,7 +183,7 @@ export const GetPAAFromURL = async (body, accessToken) => {
       const config = {
         site: extractSiteFromPage(pagesToCrawl[i]),
         page: pagesToCrawl[i],
-        accessToken: accessToken,
+        access_token: access_token,
         startDate: body.startDate,
         endDate: body.endDate,
       };
@@ -212,13 +212,13 @@ export const GetPAAFromURL = async (body, accessToken) => {
   });
 };
 
-export const GetBacklinksReport = async (site, page, accessToken) => {
+export const GetBacklinksReport = async (site, page, access_token) => {
   return new Promise(async (resolve, reject) => {
     let rankingDomains = [];
     try {
       const strikingDistanceKeywords = await GetStrikingDistanceTerms({
         site,
-        accessToken,
+        access_token,
         page,
       });
 
@@ -388,7 +388,7 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
       const config = {
         site: extractSiteFromPage(pageList[i]),
         page: pageList[i],
-        accessToken: reqConfig.access_token,
+        access_token: reqConfig.access_token,
         startDate: reqConfig.startDate,
         endDate: reqConfig.endDate,
       };

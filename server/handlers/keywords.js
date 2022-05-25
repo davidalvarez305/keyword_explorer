@@ -26,7 +26,7 @@ export const GetKeywordsFromURL = async (req, res) => {
   const config = {
     site: extractSiteFromPage(req.body.page),
     page: req.body.page,
-    accessToken: req.session.access_token,
+    access_token: req.session.access_token,
     startDate: req.body.startDate,
     endDate: req.body.endDate,
   };
@@ -193,10 +193,14 @@ export const GeneratePageReport = async (req, res) => {
     const data = await GetKeywordPositionsByURL(page, reqConfig);
     const universalResults = xlsx.utils.json_to_sheet(data);
     const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, universalResults, "Test");
+    xlsx.utils.book_append_sheet(
+      workbook,
+      universalResults,
+      "Universal Results"
+    );
 
     // PAA
-    // Limiting to 10 keywords for now
+    // Limiting to 10 keywords for testing
     const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
     const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
     xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
@@ -205,10 +209,9 @@ export const GeneratePageReport = async (req, res) => {
       page,
       reqConfig
     );
-    console.log("strikingDistanceKeywords: ", strikingDistanceKeywords);
 
     // Featured Snippets
-    // Limiting to 10 keywords for now
+    // Limiting to 10 keywords for testing
     const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
       strikingDistanceKeywords.join("\n")
     );
