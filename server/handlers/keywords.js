@@ -1,22 +1,20 @@
-import axios from "axios";
 import {
-  CrawlGoogleSERP,
   RequestKeywords,
-  GetPAAFromURL,
   GetStrikingDistanceTerms,
   GetBacklinksReport,
-  GetKeywordMSV,
   GenerateWorkbook,
   GetPeopleAlsoAskQuestionsByKeywords,
   GetPeopleAlsoAskQuestionsByURL,
+  GetSEMRushKeywords,
+  GetFeaturedSnippetsByKeyword,
+  GetSERPVideosByKeyword,
+  GetKeywordPositionsByURL,
 } from "../actions/keywords.js";
 import {
-  createPeopleAlsoAskReport,
-  extractQuestions,
   extractSiteFromPage,
   removeDuplicatesAndAppendKeywords,
-  transformSEMRushData,
 } from "../utils/keywords.js";
+import xlsx from "xlsx";
 
 export const GetKeywordsFromURL = async (req, res) => {
   if (!req.body.page) {
@@ -74,109 +72,75 @@ export const PeopleAlsoAskByURL = async (req, res) => {
 };
 
 export const StrikingDistance = async (req, res) => {
-  if (!req.body.pages) {
+  if (!req.query.pages) {
     return res
       .status(400)
       .json({ data: "Please include pages in your request." });
   }
 
-  const pagesToCrawl = req.body.pages.split("\n");
-  let strikingDistanceKeywords = [];
+  const { pages, startDate, endDate } = req.query;
+  const { access_token } = req.session;
 
-  for (let i = 0; i < pagesToCrawl.length; i++) {
-    const config = {
-      site: extractSiteFromPage(pagesToCrawl[i]),
-      page: pagesToCrawl[i],
-      accessToken: req.session.access_token,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-    };
-
-    try {
-      const keywords = await GetStrikingDistanceTerms(config);
-      strikingDistanceKeywords = [...strikingDistanceKeywords, ...keywords];
-      GenerateWorkbook(strikingDistanceKeywords);
-      return res.status(200).json({ data: strikingDistanceKeywords });
-    } catch (err) {
-      return res.status(500).json({ data: err.message });
-    }
+  try {
+    const data = await GetStrikingDistanceTerms(pages, {
+      access_token,
+      startDate,
+      endDate,
+    });
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(500).json({ data: err.message });
   }
 };
 
-export const GetKeywordPositionsByURL = async (req, res) => {
-  if (!req.body.pages) {
+export const KeywordPositionsByURL = async (req, res) => {
+  if (!req.query.pages) {
     return res
       .status(400)
       .json({ data: "Please include a site in your request." });
   }
 
-  let keywordsArray = [];
-  for (let i = 0; i < req.body.pages.length; i++) {
-    const config = {
-      site: extractSiteFromPage(req.body.pages[i]),
-      page: req.body.pages[i],
-      accessToken: req.session.access_token,
-      startDate: req.body.startDate,
-      endDate: req.body.endDate,
-    };
+  const { pages, startDate, endDate } = req.query;
+  const { access_token } = req.session;
 
-    try {
-      const keywords = await RequestKeywords(config);
-      keywordsArray = [
-        ...keywordsArray,
-        ...removeDuplicatesAndAppendKeywords(keywords, req.body.pages[i]),
-      ];
-    } catch (err) {
-      return res.status(400).json({ data: err.message });
-    }
+  try {
+    const data = await GetKeywordPositionsByURL(pages, {
+      access_token,
+      startDate,
+      endDate,
+    });
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
   }
-
-  return res.status(200).json({ data: keywordsArray });
 };
 
-export const GetSEMRushKeywordReport = async (req, res) => {
-  if (!req.body.page) {
+export const SEMRushKeywords = async (req, res) => {
+  if (!req.query.page) {
     return res
       .status(400)
       .json({ data: "Please include a page in your request." });
   }
 
-  const url = `https://api.semrush.com/`;
-  const params = {
-    type: "url_organic",
-    key: process.env.SEMRUSH_API_KEY,
-    url: req.body.page,
-    database: "us",
-    display_limit: req.body.quantity,
-  };
-
-  axios(
-    url,
-    {
-      method: "GET",
-      params: params,
-    },
-    null
-  )
+  GetSEMRushKeywords(req.query.page)
     .then((data) => {
-      const rows = transformSEMRushData(data.data);
-      return res.status(200).json(rows);
+      return res.status(200).json({ data });
     })
     .catch((err) => {
       return res.status(400).json({ data: err.message });
     });
 };
 
-export const GetSEMRushBacklinksReport = async (req, res) => {
-  if (!req.body.page) {
+export const SEMRushBacklinksReport = async (req, res) => {
+  if (!req.query.page) {
     return res
       .status(400)
       .json({ data: "Please include a page in your request." });
   }
 
   GetBacklinksReport(
-    extractSiteFromPage(req.body.page),
-    req.body.page,
+    extractSiteFromPage(req.query.page),
+    req.query.page,
     req.session.access_token
   )
     .then((data) => {
@@ -187,64 +151,76 @@ export const GetSEMRushBacklinksReport = async (req, res) => {
     });
 };
 
-export const GetFeaturedSnippetsByKeyword = async (req, res) => {
-  if (!req.body.keywords) {
+export const FeaturedSnippetsByKeyword = async (req, res) => {
+  if (!req.query.keywords) {
     return res
       .status(400)
       .json({ data: "Please include keywords in your request." });
   }
-
-  const keywords = req.body.keywords.split("\n");
-
-  let featuredSnippets = [];
   try {
-    for (let i = 0; i < keywords.length; i++) {
-      let obj = {};
-      const serp = await CrawlGoogleSERP(keywords[i]);
-      obj["Keyword"] = keywords[i];
-      obj["MSV"] = await GetKeywordMSV(keywords[i]);
-      obj["URL That Owns It"] = serp.answer_box.link;
-      obj["Ranking Text"] = serp.answer_box.snippet;
-      featuredSnippets.push(obj);
-    }
+    const data = await GetFeaturedSnippetsByKeyword(req.query.keywords);
+    return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }
-  return res.status(200).json({ data: featuredSnippets });
 };
 
-export const GetSERPVideosByKeyword = async (req, res) => {
-  if (!req.body.keywords) {
+export const SERPVideosByKeyword = async (req, res) => {
+  if (!req.query.keywords) {
     return res
       .status(400)
       .json({ data: "Please include keywords in your request." });
   }
-
-  const keywords = req.body.keywords.split("\n");
-
-  let videoSnippets = [];
   try {
-    for (let i = 0; i < keywords.length; i++) {
-      const serp = await CrawlGoogleSERP(keywords[i]);
-      for (let j = 0; j < serp.organic_results.length; j++) {
-        if (serp.organic_results[j].link.includes("youtube.com")) {
-          let obj = {};
-          obj["Keyword"] = keywords[i];
-          obj["MSV"] = await GetKeywordMSV(keywords[i]);
-          obj["URL That Owns It"] = serp.organic_results[j].link;
-          obj["Title"] = serp.organic_results[j].title;
-          videoSnippets.push(obj);
-        }
-      }
-    }
+    const data = await GetSERPVideosByKeyword(req.query.keywords);
+    return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }
-  return res.status(200).json({ data: videoSnippets });
 };
 
 export const GeneratePageReport = async (req, res) => {
-  console.log(req);
-  const page = req.query.page;
-  return res.status(200).json({ data: page });
+  const { page, startDate, endDate } = req.query;
+  const { access_token } = req.session;
+  const reqConfig = {
+    access_token,
+    startDate,
+    endDate,
+  };
+
+  try {
+    // Universal Results
+    const data = await GetKeywordPositionsByURL(page, reqConfig);
+    const universalResults = xlsx.utils.json_to_sheet(data);
+    const workbook = xlsx.utils.book_new();
+    xlsx.utils.book_append_sheet(workbook, universalResults, "Test");
+
+    // PAA
+    // Limiting to 5 keywords for now
+    const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
+    const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
+    xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
+
+    const strikingDistanceKeywords = await GetStrikingDistanceTerms(
+      page,
+      reqConfig
+    );
+
+    // Featured Snippets
+    // Limiting to 5 keywords for now
+    const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
+      strikingDistanceKeywords.join("\n")
+    );
+
+    const featuredSnippets = xlsx.utils.json_to_sheet(ftrdSnippets);
+    xlsx.utils.book_append_sheet(
+      workbook,
+      featuredSnippets,
+      "Featured Snippets"
+    );
+    xlsx.writeFile(workbook, "Test.xlsx");
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
+  }
+  return res.status(200).json({ data: "hey there" });
 };

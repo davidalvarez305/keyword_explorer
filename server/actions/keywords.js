@@ -8,6 +8,7 @@ import {
   extractSiteFromPage,
   FilterStrikingDistanceKeywords,
   getTopDomainsFromList,
+  removeDuplicatesAndAppendKeywords,
   transformBacklinksAnchorsReport,
   transformBacklinksData,
   transformBatchComparisonData,
@@ -90,7 +91,7 @@ export const RequestKeywords = async ({
         resolve(keywords);
       })
       .catch((err) => {
-        console.error(err.message);
+        console.error("Error requesting keywords: ", err.message);
         if (err.message === "Request failed with status code 403") {
           reject(err);
         }
@@ -99,23 +100,55 @@ export const RequestKeywords = async ({
   });
 };
 
-export const GetStrikingDistanceTerms = async ({
-  site,
-  accessToken,
-  page,
-  startDate,
-  endDate,
-}) => {
-  return new Promise((resolve, reject) => {
-    RequestKeywords({ site, accessToken, page, startDate, endDate })
-      .then((keywords) => {
-        let strikingDistanceKeywords = [];
+export const GetKeywordPositionsByURL = (pages, reqConfig) => {
+  const pageList = pages.split("\n");
+  return new Promise(async (resolve, reject) => {
+    let keywordsArray = [];
+    for (let i = 0; i < pageList.length; i++) {
+      const config = {
+        site: extractSiteFromPage(pageList[i]),
+        page: pageList[i],
+        accessToken: reqConfig.access_token,
+        startDate: reqConfig.startDate,
+        endDate: reqConfig.endDate,
+      };
+
+      try {
+        const keywords = await RequestKeywords(config);
+        keywordsArray = [
+          ...keywordsArray,
+          ...removeDuplicatesAndAppendKeywords(keywords, pageList[i]),
+        ];
+      } catch (err) {
+        reject(err);
+      }
+    }
+    resolve(keywordsArray);
+  });
+};
+export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
+  const pagesToCrawl = pages.split("\n");
+  return new Promise(async (resolve, reject) => {
+    let strikingDistanceKeywords = [];
+
+    for (let i = 0; i < pagesToCrawl.length; i++) {
+      const config = {
+        site: extractSiteFromPage(pagesToCrawl[i]),
+        page: pagesToCrawl[i],
+        accessToken: reqConfig.access_token,
+        startDate: reqConfig.startDate,
+        endDate: reqConfig.endDate,
+      };
+      try {
+        const keywords = await RequestKeywords(config);
         strikingDistanceKeywords = [
           ...FilterStrikingDistanceKeywords(keywords),
         ];
-        resolve(strikingDistanceKeywords);
-      })
-      .catch(reject);
+      } catch (err) {
+        reject(err);
+      }
+    }
+    resolve(strikingDistanceKeywords);
   });
 };
 
@@ -346,20 +379,24 @@ export const GetPeopleAlsoAskQuestionsByKeywords = async (searchTerms) => {
   });
 };
 
-export const GetPeopleAlsoAskQuestionsByURL = async (pages) => {
+export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
+  const pageList = pages.split("\n");
   return new Promise(async (resolve, reject) => {
     let strikingDistanceKeywords = [];
-    for (let i = 0; i < pages.length; i++) {
+    for (let i = 0; i < pageList.length; i++) {
       const config = {
-        site: extractSiteFromPage(pages[i]),
-        page: pages[i],
-        accessToken: req.session.access_token,
-        startDate: req.body.startDate,
-        endDate: req.body.endDate,
+        site: extractSiteFromPage(pageList[i]),
+        page: pageList[i],
+        accessToken: reqConfig.access_token,
+        startDate: reqConfig.startDate,
+        endDate: reqConfig.endDate,
       };
 
       try {
-        const extractedKeywords = await GetStrikingDistanceTerms(config);
+        const extractedKeywords = await GetStrikingDistanceTerms(
+          pageList[i],
+          config
+        );
         strikingDistanceKeywords = [
           ...strikingDistanceKeywords,
           ...extractedKeywords,
@@ -370,7 +407,7 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages) => {
     }
 
     let peopleAlsoAskQuestions = [];
-    for (let i = 0; i < strikingDistanceKeywords.length; i++) {
+    for (let i = 0; i < 2; i++) {
       try {
         const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
         const peopleAlsoAsk = await extractQuestions(
@@ -387,13 +424,81 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages) => {
   });
 };
 
-export const GetStrikingDistanceKeywords = async ({
-  site,
-  accessToken,
-  page,
-  startDate,
-  endDate,
-}) => {};
+export const GetSEMRushKeywords = (page, quantity) => {
+  return new Promise((resolve, reject) => {
+    const url = `https://api.semrush.com/`;
+    const params = {
+      type: "url_organic",
+      key: process.env.SEMRUSH_API_KEY,
+      url: page,
+      database: "us",
+      display_limit: quantity,
+    };
+
+    axios(
+      url,
+      {
+        method: "GET",
+        params: params,
+      },
+      null
+    )
+      .then((data) => {
+        const rows = transformSEMRushData(data.data);
+        resolve(rows);
+      })
+      .catch(reject);
+  });
+};
+
+export const GetFeaturedSnippetsByKeyword = async (keywords) => {
+  const keywordList = keywords.split("\n");
+  return new Promise(async (resolve, reject) => {
+    let featuredSnippets = [];
+    try {
+      for (let i = 0; i < 2; i++) {
+        let obj = {};
+        const serp = await CrawlGoogleSERP(keywordList[i]);
+        if (serp.answer_box) {
+          obj["Keyword"] = keywordList[i];
+          obj["MSV"] = await GetKeywordMSV(keywordList[i]);
+          obj["URL That Owns It"] = serp.answer_box.link;
+          obj["Ranking Text"] = serp.answer_box.snippet;
+          featuredSnippets.push(obj);
+        }
+      }
+    } catch (err) {
+      reject(err);
+    }
+    resolve(featuredSnippets);
+  });
+};
+
+export const GetSERPVideosByKeyword = (keywords) => {
+  return new Promise(async (resolve, reject) => {
+    const keywordsList = keywords.split("\n");
+
+    let videoSnippets = [];
+    try {
+      for (let i = 0; i < keywordsList.length; i++) {
+        const serp = await CrawlGoogleSERP(keywordsList[i]);
+        for (let j = 0; j < serp.organic_results.length; j++) {
+          if (serp.organic_results[j].link.includes("youtube.com")) {
+            let obj = {};
+            obj["Keyword"] = keywordsList[i];
+            obj["MSV"] = await GetKeywordMSV(keywordsList[i]);
+            obj["URL That Owns It"] = serp.organic_results[j].link;
+            obj["Title"] = serp.organic_results[j].title;
+            videoSnippets.push(obj);
+          }
+        }
+      }
+    } catch (err) {
+      reject(err);
+    }
+    resolve(videoSnippets);
+  });
+};
 
 export const GenerateWorkbook = (data) => {
   const wb = xlsx.utils.book_new();

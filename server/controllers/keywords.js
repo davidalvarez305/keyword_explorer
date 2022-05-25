@@ -5,11 +5,11 @@ import {
   PeopleAlsoAskByKeywords,
   PeopleAlsoAskByURL,
   StrikingDistance,
-  GetKeywordPositionsByURL,
-  GetSEMRushKeywordReport,
-  GetSEMRushBacklinksReport,
-  GetFeaturedSnippetsByKeyword,
-  GetSERPVideosByKeyword,
+  KeywordPositionsByURL,
+  SEMRushKeywords,
+  SEMRushBacklinksReport,
+  FeaturedSnippetsByKeyword,
+  SERPVideosByKeyword,
   GeneratePageReport,
 } from "../handlers/keywords.js";
 import authRequired from "../middleware/authRequired.js";
@@ -21,7 +21,7 @@ const router = express.Router();
 router.post("/", googleAuth, GetKeywordsFromURL);
 
 // Get PAA Questions by Keywords
-router.get("/paa-keywirds", googleAuth, PeopleAlsoAskByKeywords);
+router.get("/paa-keywords", googleAuth, PeopleAlsoAskByKeywords);
 
 // Get PAA Questions By URL
 router.get("/paa-url", googleAuth, PeopleAlsoAskByURL);
@@ -30,21 +30,21 @@ router.get("/paa-url", googleAuth, PeopleAlsoAskByURL);
 router.post("/striking-distance", googleAuth, StrikingDistance);
 
 // Get Keyword Positions By URL
-router.post("/positions", googleAuth, GetKeywordPositionsByURL);
+router.post("/positions", googleAuth, KeywordPositionsByURL);
 
 // Get URLs of Websites Associated With Account
-router.post("/semrush", authRequired, GetSEMRushKeywordReport);
+router.get("/semrush", authRequired, SEMRushKeywords);
 
 // Get URLs of Websites Associated With Account
-router.post("/backlinks-report", googleAuth, GetSEMRushBacklinksReport);
+router.get("/semrush-backlinks-report", googleAuth, SEMRushBacklinksReport);
 
 // Get URLs of Websites Associated With Account
-router.post("/featured-snippets", authRequired, GetFeaturedSnippetsByKeyword);
+router.get("/featured-snippets", authRequired, FeaturedSnippetsByKeyword);
 
 // Get URLs of Websites Associated With Account
-router.post("/featured-videos", authRequired, GetSERPVideosByKeyword);
+router.get("/featured-videos", authRequired, SERPVideosByKeyword);
 
 // Get URLs of Websites Associated With Account
-router.get("/generate-report", authRequired, GeneratePageReport);
+router.get("/generate-report", googleAuth, GeneratePageReport);
 
 export default router;
