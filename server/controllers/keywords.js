@@ -35,16 +35,16 @@ router.post("/positions", googleAuth, KeywordPositionsByURL);
 // Get URLs of Websites Associated With Account
 router.get("/semrush", authRequired, SEMRushKeywords);
 
-// Get URLs of Websites Associated With Account
+// Generate SEMRush Competitors Backlinks Report
 router.get("/semrush-backlinks-report", googleAuth, SEMRushBacklinksReport);
 
-// Get URLs of Websites Associated With Account
+// Generate Featured Snippets Report
 router.get("/featured-snippets", authRequired, FeaturedSnippetsByKeyword);
 
-// Get URLs of Websites Associated With Account
+// Generate Featured Videos on SERP Report
 router.get("/featured-videos", authRequired, SERPVideosByKeyword);
 
-// Get URLs of Websites Associated With Account
+// Create Compilation Report
 router.get("/generate-report", googleAuth, GeneratePageReport);
 
 export default router;
