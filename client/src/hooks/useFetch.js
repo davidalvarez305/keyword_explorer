@@ -13,6 +13,7 @@ export default function useFetch() {
       url: config.url,
       method: config.method ? config.method : undefined,
       headers: config.headers ? config.headers : undefined,
+      responseType: config.responseType ? config.responseType : undefined,
       withCredentials: true,
       data: config.body ? config.body : null,
       validateStatus: function (status) {

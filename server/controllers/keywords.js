@@ -27,10 +27,10 @@ router.get("/paa-keywords", googleAuth, PeopleAlsoAskByKeywords);
 router.get("/paa-url", googleAuth, PeopleAlsoAskByURL);
 
 // Get Striking Distance Keywords From URL
-router.post("/striking-distance", googleAuth, StrikingDistance);
+router.get("/striking-distance", googleAuth, StrikingDistance);
 
 // Get Keyword Positions By URL
-router.post("/positions", googleAuth, KeywordPositionsByURL);
+router.get("/positions", googleAuth, KeywordPositionsByURL);
 
 // Get URLs of Websites Associated With Account
 router.get("/semrush", authRequired, SEMRushKeywords);

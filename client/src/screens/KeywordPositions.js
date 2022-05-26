@@ -27,7 +27,7 @@ export default function KeywordPositions() {
     let validationArray = [];
     for (let i = 0; i < pages.length; i++) {
       if (!pages[i].match(pageRegex)) {
-        validationArray = [...validationArray, pages[i]];
+        validationArray.push(pages[i]);
       }
     }
     return validationArray.length === 0;
@@ -51,11 +51,8 @@ export default function KeywordPositions() {
         }
         makeRequest(
           {
-            url: KEYWORD_POSITIONS_ROUTE,
-            method: 'POST',
-            body: {
-              pages: values.pages.split(separatorRegex),
-            },
+            url: KEYWORD_POSITIONS_ROUTE + `/?pages=${values.pages.split(separatorRegex).join("\n")}`,
+            method: 'GET',
           },
           res => {
             if (res.data.data && res.data.data.length > 0) {

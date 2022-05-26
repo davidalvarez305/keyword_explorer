@@ -1,5 +1,4 @@
 import axios from "axios";
-import axios2 from "axios-https-proxy-fix";
 import "dotenv/config";
 import {
   calculateDateDifference,
@@ -15,6 +14,7 @@ import {
   transformSEMRushMSVData,
 } from "../utils/keywords.js";
 import xlsx from "xlsx";
+import path from "path";
 
 export const QueryGoogleKeywordPlanner = (query, token) => {
   const route = `https://googleads.googleapis.com/v10/customers/${GOOGLE_CUSTOMER_ID}:generateKeywordIdeas`;
@@ -521,20 +521,64 @@ export const GetSERPVideosByKeyword = (keywords) => {
   });
 };
 
-export const GenerateWorkbook = (data) => {
-  const wb = xlsx.utils.book_new();
+export const GenerateWorkbook = async (page, reqConfig) => {
+  // Universal Results
+  const data = await GetKeywordPositionsByURL(page, reqConfig);
+  const universalResults = xlsx.utils.json_to_sheet(data);
+  const workbook = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(workbook, universalResults, "Universal Results");
+  console.log("Finished Universal Results...");
+  
+  // PAA
+  const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
+  const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
+  xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
+  const strikingDistanceKeywords = await GetStrikingDistanceTerms(
+    page,
+    reqConfig
+  );
+  console.log("Finished PAA...");
 
-  let sheets = [];
+  // Featured Snippets
+  const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
+    strikingDistanceKeywords.join("\n")
+  );
+  const featuredSnippets = xlsx.utils.json_to_sheet(ftrdSnippets);
+  xlsx.utils.book_append_sheet(workbook, featuredSnippets, "Featured Snippets");
+  console.log("Finished Featured Snippets...");
 
-  for (let i = 0; i < data.length; i++) {
-    let obj = {};
-    obj.keyword = data[i];
-    sheets.push(obj);
-  }
+  // Videos
+  const videos = await GetSERPVideosByKeyword(
+    strikingDistanceKeywords.join("\n")
+  );
+  const videosTab = xlsx.utils.json_to_sheet(videos);
+  xlsx.utils.book_append_sheet(workbook, videosTab, "Video");
+  console.log("Finished Video...");
 
-  const ws = xlsx.utils.json_to_sheet(sheets);
-  xlsx.utils.book_append_sheet(wb, ws, "Test");
+  // Competitor Backlinks
+  const backlinks = await GetBacklinksReport(page, reqConfig);
+  const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
+  xlsx.utils.book_append_sheet(
+    workbook,
+    competitorBacklinks,
+    "Competitor Backlinks"
+  );
+  console.log("Finished Competitor Backlinks...");
 
-  xlsx.writeFile(wb, "test.xlsx");
-  return true;
+  // Keyword Positions
+  const kwPositions = await GetKeywordPositionsByURL(page, reqConfig);
+  const keywordPositions = xlsx.utils.json_to_sheet(kwPositions);
+  xlsx.utils.book_append_sheet(workbook, keywordPositions, "Keyword Positions");
+  console.log("Finished Keyword Positions...");
+
+  // Create file in path;
+  const folder = path.resolve("../reports/");
+  const pagePath = new URL(page);
+  const pathname = pagePath.pathname.split("/");
+  const fileName = pathname[pathname.length - 1];
+  const filePath = folder + "/" + `${fileName}.xlsx`;
+  console.log(`File path: ${filePath}`)
+  xlsx.writeFile(workbook, filePath);
+
+  return filePath;
 };

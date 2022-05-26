@@ -10,11 +10,7 @@ import {
   GetSERPVideosByKeyword,
   GetKeywordPositionsByURL,
 } from "../actions/keywords.js";
-import {
-  extractSiteFromPage,
-  removeDuplicatesAndAppendKeywords,
-} from "../utils/keywords.js";
-import xlsx from "xlsx";
+import { extractSiteFromPage } from "../utils/keywords.js";
 
 export const GetKeywordsFromURL = async (req, res) => {
   if (!req.body.page) {
@@ -188,70 +184,13 @@ export const GeneratePageReport = async (req, res) => {
   };
 
   try {
-    // Universal Results
-    const data = await GetKeywordPositionsByURL(page, reqConfig);
-    const universalResults = xlsx.utils.json_to_sheet(data);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(
-      workbook,
-      universalResults,
-      "Universal Results"
-    );
-    console.log("Finished Universal Results...");
-
-    // PAA
-    const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
-    const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
-    xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
-    const strikingDistanceKeywords = await GetStrikingDistanceTerms(
-      page,
-      reqConfig
-    );
-    console.log("Finished PAA...");
-
-    // Featured Snippets
-    const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
-      strikingDistanceKeywords.join("\n")
-    );
-    const featuredSnippets = xlsx.utils.json_to_sheet(ftrdSnippets);
-    xlsx.utils.book_append_sheet(
-      workbook,
-      featuredSnippets,
-      "Featured Snippets"
-    );
-    console.log("Finished Featured Snippets...");
-
-    // Videos
-    const videos = await GetSERPVideosByKeyword(
-      strikingDistanceKeywords.join("\n")
-    );
-    const videosTab = xlsx.utils.json_to_sheet(videos);
-    xlsx.utils.book_append_sheet(workbook, videosTab, "Video");
-    console.log("Finished Video...");
-
-    // Competitor Backlinks
-    const backlinks = await GetBacklinksReport(page, reqConfig);
-    const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
-    xlsx.utils.book_append_sheet(
-      workbook,
-      competitorBacklinks,
-      "Competitor Backlinks"
-    );
-    console.log("Finished Competitor Backlinks...");
-
-    // Keyword Positions
-    const kwPositions = await GetKeywordPositionsByURL(page, reqConfig);
-    const keywordPositions = xlsx.utils.json_to_sheet(kwPositions);
-    xlsx.utils.book_append_sheet(
-      workbook,
-      keywordPositions,
-      "Keyword Positions"
-    );
-    console.log("Finished Keyword Positions...");
-
-    xlsx.writeFile(workbook, "Test.xlsx");
+    const path = await GenerateWorkbook(page, reqConfig);
+    return res.sendFile(path, (error) => {
+      if (error) {
+        return res.status(400).json({ data: error.message });
+      }
+    });
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }
-  return res.status(200).json({ data: "hey there" });
 };
