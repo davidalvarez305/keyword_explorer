@@ -184,10 +184,12 @@ export const GeneratePageReport = async (req, res) => {
   };
 
   try {
-    const [path, fileName] = await GenerateWorkbook(page, reqConfig);
-    res.download(path, fileName, (err) => {
-      console.error(err);
-    });
+    const path = await GenerateWorkbook(page, reqConfig);
+    return res.sendFile(path, (error) => {
+      if (error) {
+        return res.status(400).json({ data: error.message });
+      }
+    })
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }

@@ -41,7 +41,7 @@ export default function GenerateReport() {
           makeRequest(
             {
               url: GENERATE_REPORT_ROUTE + `/?page=${values.page}`,
-              responseType: 'blog',
+              responseType: 'blob',
               headers: {
                 Accept: 'application/octet-stream',
               },

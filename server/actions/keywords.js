@@ -580,5 +580,5 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   console.log(`File path: ${filePath}`);
   xlsx.writeFile(workbook, filePath);
 
-  return [filePath, fileName];
+  return filePath;
 };
