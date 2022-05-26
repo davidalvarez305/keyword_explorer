@@ -10,12 +10,11 @@ export default function GenerateReport() {
   const { makeRequest, isLoading } = useFetch();
   const [downloadFile, setDownloadFile] = useState({
     file: null,
-    fileName: '',
   });
 
-  function FileDownload({ file, fileName }) {
+  function FileDownload({ file }) {
     function handleClick() {
-      saveAs(file, fileName);
+      saveAs(file);
     }
     return (
       <Button
@@ -49,13 +48,13 @@ export default function GenerateReport() {
             },
             res => {
               if (res.data) {
-                const file = new Blob([res.data], {
-                  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                });
                 const pagePath = new URL(values.page);
                 const pathname = pagePath.pathname.split('/');
                 const fileName = pathname[pathname.length - 1];
-                setDownloadFile({ file, fileName });
+                const file = new File([res.data], `${fileName}.xlsx`, {
+                  type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                });
+                setDownloadFile({ file });
               }
             }
           );
