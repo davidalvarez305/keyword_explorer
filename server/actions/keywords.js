@@ -88,6 +88,9 @@ export const RequestKeywords = async ({
         if (data.data.rows) {
           keywords = [...data.data.rows];
         }
+        console.log(
+          `Successfully returned ${keywords.length} keywords from Search Console...`
+        );
         resolve(keywords);
       })
       .catch((err) => {
@@ -127,7 +130,6 @@ export const GetKeywordPositionsByURL = (pages, reqConfig) => {
   });
 };
 export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
-  console.log("reqConfig: ", reqConfig);
   const pagesToCrawl = pages.split("\n");
   return new Promise(async (resolve, reject) => {
     let strikingDistanceKeywords = [];
@@ -149,6 +151,9 @@ export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
         reject(err);
       }
     }
+    console.log(
+      `Successfully returned ${strikingDistanceKeywords.length} striking distance keywords from Search Console...`
+    );
     resolve(strikingDistanceKeywords);
   });
 };
@@ -212,15 +217,14 @@ export const GetPAAFromURL = async (body, access_token) => {
   });
 };
 
-export const GetBacklinksReport = async (site, page, access_token) => {
+export const GetBacklinksReport = async (pages, reqConfig) => {
   return new Promise(async (resolve, reject) => {
     let rankingDomains = [];
     try {
-      const strikingDistanceKeywords = await GetStrikingDistanceTerms({
-        site,
-        access_token,
-        page,
-      });
+      const strikingDistanceKeywords = await GetStrikingDistanceTerms(
+        pages,
+        reqConfig
+      );
 
       console.log(
         `Length of Striking Distance Keywords: ${strikingDistanceKeywords.length}`
@@ -254,9 +258,10 @@ export const GetBacklinksReport = async (site, page, access_token) => {
       }
       const top5Pages = getTopDomainsFromList(rankingDomains).slice(0, 5);
       const batchComparison = await GetBatchComparison(top5Pages);
+      console.log(`Resolving batch comparison...`);
       resolve(batchComparison);
     } catch (err) {
-      console.log("Error");
+      console.log("Error generating backlinks report: ", err.message);
       reject(err);
     }
   });
@@ -408,7 +413,7 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
     }
 
     let peopleAlsoAskQuestions = [];
-    for (let i = 0; i < 10; i++) {
+    for (let i = 0; i < strikingDistanceKeywords.length; i++) {
       try {
         const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
         if (questions.related_questions) {
@@ -462,7 +467,7 @@ export const GetFeaturedSnippetsByKeyword = async (keywords) => {
   return new Promise(async (resolve, reject) => {
     let featuredSnippets = [];
     try {
-      for (let i = 0; i < 10; i++) {
+      for (let i = 0; i < keywordList.length; i++) {
         let obj = {};
         const serp = await CrawlGoogleSERP(keywordList[i]);
         if (serp.answer_box) {
@@ -470,12 +475,17 @@ export const GetFeaturedSnippetsByKeyword = async (keywords) => {
           obj["MSV"] = await GetKeywordMSV(keywordList[i]);
           obj["URL That Owns It"] = serp.answer_box.link;
           obj["Ranking Text"] = serp.answer_box.snippet;
+          console.log(`Returning featured snippets for ${keywordList[i]}.`);
           featuredSnippets.push(obj);
         }
       }
     } catch (err) {
+      console.log(`Error fetching Featured Snippets: `, err.message);
       reject(err);
     }
+    console.log(
+      `Successfully extracted ${featuredSnippets.length} Featured Snippets.`
+    );
     resolve(featuredSnippets);
   });
 };
@@ -495,13 +505,18 @@ export const GetSERPVideosByKeyword = (keywords) => {
             obj["MSV"] = await GetKeywordMSV(keywordsList[i]);
             obj["URL That Owns It"] = serp.organic_results[j].link;
             obj["Title"] = serp.organic_results[j].title;
+            console.log(`Returning videos for ${keywordsList[i]}.`);
             videoSnippets.push(obj);
           }
         }
       }
     } catch (err) {
+      console.log(`Error fetching Video Snippets: `, err.message);
       reject(err);
     }
+    console.log(
+      `Successfully extracted ${videoSnippets.length} Video Snippets.`
+    );
     resolve(videoSnippets);
   });
 };
