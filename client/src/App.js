@@ -8,7 +8,7 @@ import { flexStyles } from './utils/flex';
 import GenerateReport from './screens/GenerateReport';
 
 export default function App() {
-  useLoginRequired();
+  // useLoginRequired();
   const [showReport, setShowReport] = useState(false);
 
   function RenderOptionsButtons() {
