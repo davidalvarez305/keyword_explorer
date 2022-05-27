@@ -528,7 +528,7 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, universalResults, "Universal Results");
   console.log("Finished Universal Results...");
-    
+
   // PAA
   const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
   const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);

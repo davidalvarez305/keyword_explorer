@@ -90,13 +90,13 @@ export const StrikingDistance = async (req, res) => {
 };
 
 export const KeywordPositionsByURL = async (req, res) => {
-  if (!req.query.pages) {
+  if (!req.body.pages) {
     return res
       .status(400)
       .json({ data: "Please include a site in your request." });
   }
 
-  const { pages, startDate, endDate } = req.query;
+  const { pages, startDate, endDate } = req.body;
   const { access_token } = req.session;
 
   try {

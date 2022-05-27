@@ -51,8 +51,11 @@ export default function KeywordPositions() {
         }
         makeRequest(
           {
-            url: KEYWORD_POSITIONS_ROUTE + `/?pages=${values.pages.split(separatorRegex).join("\n")}`,
-            method: 'GET',
+            url: KEYWORD_POSITIONS_ROUTE,
+            method: 'POST',
+            body: {
+              pages: `${values.pages.split(separatorRegex).join('\n')}`,
+            },
           },
           res => {
             if (res.data.data && res.data.data.length > 0) {
