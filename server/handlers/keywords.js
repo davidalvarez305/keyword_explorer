@@ -134,12 +134,16 @@ export const SEMRushBacklinksReport = async (req, res) => {
       .json({ data: "Please include a page in your request." });
   }
 
+  const { page, startDate, endDate } = req.query.page;
+  const { access_token } = req.session;
+
   try {
-    const data = await GetBacklinksReport(
-      extractSiteFromPage(req.query.page),
-      req.query.page,
-      req.session.access_token
-    );
+    const strikingDistanceKeywords = await GetStrikingDistanceTerms(page, {
+      access_token,
+      startDate,
+      endDate,
+    });
+    const data = await GetBacklinksReport(strikingDistanceKeywords);
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -189,7 +193,7 @@ export const GeneratePageReport = async (req, res) => {
       if (error) {
         return res.status(400).json({ data: error.message });
       }
-    })
+    });
   } catch (err) {
     return res.status(400).json({ data: err.message });
   }

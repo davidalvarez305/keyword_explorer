@@ -217,19 +217,10 @@ export const GetPAAFromURL = async (body, access_token) => {
   });
 };
 
-export const GetBacklinksReport = async (pages, reqConfig) => {
+export const GetBacklinksReport = async (strikingDistanceKeywords) => {
   return new Promise(async (resolve, reject) => {
     let rankingDomains = [];
     try {
-      const strikingDistanceKeywords = await GetStrikingDistanceTerms(
-        pages,
-        reqConfig
-      );
-
-      console.log(
-        `Length of Striking Distance Keywords: ${strikingDistanceKeywords.length}`
-      );
-
       const selectedKeywords = strikingDistanceKeywords.slice(0, 80);
       for (let i = 0; i < selectedKeywords.length; i++) {
         const res = await axios(
@@ -537,7 +528,8 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   console.log("Finished Universal Results...");
 
   // SERP Features
-  const { featuredSnippets, videoSnippets, peopleAlsoAsk } = await GetSERPSnippetsAndVideos(strikingDistanceKeywords.join("\n"));
+  const { featuredSnippets, videoSnippets, peopleAlsoAsk } =
+    await GetSERPSnippetsAndVideos(strikingDistanceKeywords.join("\n"));
 
   // PAA
   const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
@@ -555,7 +547,7 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   console.log("Finished Video...");
 
   // Competitor Backlinks
-  const backlinks = await GetBacklinksReport(page, reqConfig);
+  const backlinks = await GetBacklinksReport(strikingDistanceKeywords);
   const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
   xlsx.utils.book_append_sheet(
     workbook,
