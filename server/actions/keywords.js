@@ -522,6 +522,12 @@ export const GetSERPVideosByKeyword = (keywords) => {
 };
 
 export const GenerateWorkbook = async (page, reqConfig) => {
+  // Striking Distance Keywords
+  console.log("Getting striking distance keywords...");
+  const strikingDistanceKeywords = await GetStrikingDistanceTerms(
+    page,
+    reqConfig
+  );
 
   // Universal Results
   const data = await GetKeywordPositionsByURL(page, reqConfig);
@@ -530,29 +536,21 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   xlsx.utils.book_append_sheet(workbook, universalResults, "Universal Results");
   console.log("Finished Universal Results...");
 
+  // SERP Features
+  const { featuredSnippets, videoSnippets, peopleAlsoAsk } = await GetSERPSnippetsAndVideos(strikingDistanceKeywords.join("\n"));
+
   // PAA
-  const peopleAlsoAsk = await GetPeopleAlsoAskQuestionsByURL(page, reqConfig);
   const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
   xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
-  const strikingDistanceKeywords = await GetStrikingDistanceTerms(
-    page,
-    reqConfig
-  );
   console.log("Finished PAA...");
 
   // Featured Snippets
-  const ftrdSnippets = await GetFeaturedSnippetsByKeyword(
-    strikingDistanceKeywords.join("\n")
-  );
-  const featuredSnippets = xlsx.utils.json_to_sheet(ftrdSnippets);
-  xlsx.utils.book_append_sheet(workbook, featuredSnippets, "Featured Snippets");
+  const ftrdSnippets = xlsx.utils.json_to_sheet(featuredSnippets);
+  xlsx.utils.book_append_sheet(workbook, ftrdSnippets, "Featured Snippets");
   console.log("Finished Featured Snippets...");
 
   // Videos
-  const videos = await GetSERPVideosByKeyword(
-    strikingDistanceKeywords.join("\n")
-  );
-  const videosTab = xlsx.utils.json_to_sheet(videos);
+  const videosTab = xlsx.utils.json_to_sheet(videoSnippets);
   xlsx.utils.book_append_sheet(workbook, videosTab, "Video");
   console.log("Finished Video...");
 
@@ -576,4 +574,53 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   xlsx.writeFile(workbook, filePath);
 
   return filePath;
+};
+
+export const GetSERPSnippetsAndVideos = (keywords) => {
+  const keywordList = keywords.split("\n");
+  return new Promise(async (resolve, reject) => {
+    let featuredSnippets = [];
+    let videoSnippets = [];
+    let peopleAlsoAsk = [];
+    try {
+      for (let i = 0; i < keywordList.length; i++) {
+        let obj = {};
+        const serp = await CrawlGoogleSERP(keywordList[i]);
+        const keywordSearchVolume = await GetKeywordMSV(keywordList[i]);
+        if (serp.answer_box) {
+          obj["Keyword"] = keywordList[i];
+          obj["MSV"] = keywordSearchVolume;
+          obj["URL That Owns It"] = serp.answer_box.link;
+          obj["Ranking Text"] = serp.answer_box.snippet;
+          featuredSnippets.push(obj);
+        }
+        if (serp.related_questions) {
+          const PAA = await extractQuestions(serp.related_questions);
+          let data = createPeopleAlsoAskReport(PAA);
+          peopleAlsoAsk = [...peopleAlsoAsk, ...data];
+        }
+        for (let j = 0; j < serp.organic_results.length; j++) {
+          if (serp.organic_results[j].link.includes("youtube.com")) {
+            let obj = {};
+            obj["Keyword"] = keywordList[i];
+            obj["MSV"] = keywordSearchVolume;
+            obj["URL That Owns It"] = serp.organic_results[j].link;
+            obj["Title"] = serp.organic_results[j].title;
+            videoSnippets.push(obj);
+          }
+        }
+      }
+    } catch (err) {
+      console.log(`Error fetching SERP Snippets: `, err.message);
+      reject(err);
+    }
+    console.log(
+      `Successfully extracted ${featuredSnippets.length} Featured Snippets.``Successfully extracted ${videoSnippets.length} Video Snippets.`
+    );
+    resolve({
+      featuredSnippets,
+      videoSnippets,
+      peopleAlsoAsk,
+    });
+  });
 };
