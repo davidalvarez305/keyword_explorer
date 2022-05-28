@@ -522,6 +522,7 @@ export const GetSERPVideosByKeyword = (keywords) => {
 };
 
 export const GenerateWorkbook = async (page, reqConfig) => {
+
   // Universal Results
   const data = await GetKeywordPositionsByURL(page, reqConfig);
   const universalResults = xlsx.utils.json_to_sheet(data);
@@ -564,12 +565,6 @@ export const GenerateWorkbook = async (page, reqConfig) => {
     "Competitor Backlinks"
   );
   console.log("Finished Competitor Backlinks...");
-
-  // Keyword Positions
-  const kwPositions = await GetKeywordPositionsByURL(page, reqConfig);
-  const keywordPositions = xlsx.utils.json_to_sheet(kwPositions);
-  xlsx.utils.book_append_sheet(workbook, keywordPositions, "Keyword Positions");
-  console.log("Finished Keyword Positions...");
 
   // Create file in path;
   const folder = path.resolve("../reports/");
