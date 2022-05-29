@@ -1,6 +1,6 @@
 import { Button, Stack } from '@chakra-ui/react';
 import { Form, Formik } from 'formik';
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext } from 'react';
 import SimpleInputField from '../components/SimpleInputField';
 import RequestErrorMessage from '../ui/RequestErrorMessage';
 import useFetch from '../hooks/useFetch';
