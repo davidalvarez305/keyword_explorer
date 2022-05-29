@@ -5,6 +5,7 @@ import GenerateReportForm from '../forms/GenerateReportForm';
 import useFetch from '../hooks/useFetch';
 import { Button } from '@chakra-ui/react';
 import { saveAs } from 'file-saver';
+import { AiOutlineDownload } from 'react-icons/ai';
 
 export default function GenerateReport() {
   const { makeRequest, isLoading } = useFetch();
@@ -18,12 +19,13 @@ export default function GenerateReport() {
     }
     return (
       <Button
+        leftIcon={<AiOutlineDownload />}
         sx={{ my: 2.5 }}
         variant={'outline'}
-        color={'green.400'}
+        colorScheme={'teal'}
         onClick={handleClick}
       >
-        Download Report
+        Download
       </Button>
     );
   }
