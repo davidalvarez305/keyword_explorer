@@ -12,13 +12,11 @@ import { useContext, useEffect, useState } from 'react';
 import LoginForm from '../forms/LoginForm';
 import { LOGIN_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';
-import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
 import { Formik } from 'formik';
 import useLoginRequired from '../hooks/useLoginRequired';
 
 export default function LoginScreen() {
-  const navigate = useNavigate();
   const { Login } = useContext(UserContext);
   const { isLoading, makeRequest } = useFetch();
   const [loginError, setLoginError] = useState({ message: '' });
@@ -56,8 +54,7 @@ export default function LoginScreen() {
                     setLoginError({ message: data.data.data.error });
                   }
                   if (data.data.data.user) {
-                    Login(true);
-                    navigate('/');
+                    Login(data.data.data.user);
                   }
                 }
               );

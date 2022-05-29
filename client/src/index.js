@@ -9,6 +9,7 @@ import Login from './screens/Login';
 import OAuth2 from './screens/OAuth';
 import Register from './screens/Register';
 import Authorize from './screens/Authorize';
+import UpdateFields from './screens/UpdateFields';
 const container = document.getElementById('root');
 const root = ReactDOM.createRoot(container);
 
@@ -23,6 +24,7 @@ root.render(
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/authorize" element={<Authorize />} />
+            <Route path="/update" element={<UpdateFields />} />
           </Routes>
         </BrowserRouter>
       </UserProvider>

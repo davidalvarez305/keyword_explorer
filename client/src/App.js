@@ -8,7 +8,7 @@ import { flexStyles } from './utils/flex';
 import GenerateReport from './screens/GenerateReport';
 
 export default function App() {
-  // useLoginRequired();
+  useLoginRequired();
   const [showReport, setShowReport] = useState(false);
 
   function RenderOptionsButtons() {
@@ -19,7 +19,7 @@ export default function App() {
           colorScheme={'blue'}
           onClick={() => setShowReport(prev => !prev)}
         >
-          Generate Report
+          {showReport ? 'Get Keyword Positions' : 'Generate Report'}
         </Button>
       </Box>
     );

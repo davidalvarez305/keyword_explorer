@@ -4,6 +4,7 @@ import {
   LoginUser,
   LogoutUser,
   RegisterUser,
+  UpdateUserCredentials,
 } from "../actions/user.js";
 
 export const Get = async (req, res) => {
@@ -25,7 +26,7 @@ export const Login = async (req, res) => {
     .then((loginAttempt) => {
       if (loginAttempt.user) {
         req.session.userId = loginAttempt.user.id;
-        const { password, refresh_token, ...user } = loginAttempt.user;
+        const { password, ...user } = loginAttempt.user;
         return res.status(200).json({ data: { user } });
       } else {
         const { error } = loginAttempt;
@@ -73,9 +74,7 @@ export const Me = async (req, res) => {
     findUserById(req.session.userId)
       .then((foundUser) => {
         if (foundUser.user) {
-          let user = {};
-          user.id = foundUser.user.id;
-          user.token = foundUser.user.refresh_token;
+          const { password, ...user } = foundUser.user;
           return res.status(200).json({ data: { user } });
         } else {
           const error = foundUser.error;
@@ -88,5 +87,17 @@ export const Me = async (req, res) => {
       });
   } else {
     return res.status(404).json({ data: { error: "Not logged in." } });
+  }
+};
+
+export const Update = async (req, res) => {
+  if (req.session.userId) {
+    try {
+      const input = { id: req.session.userId, ...req.body };
+      const u = await UpdateUserCredentials(input);
+      return res.status(201).json({ data: u });
+    } catch (err) {
+      return res.status(500).json({ data: err.message });
+    }
   }
 };

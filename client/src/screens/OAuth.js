@@ -9,7 +9,7 @@ import { UserContext } from '../context/UserContext';
 export default function OAuth2() {
   const [code, setCode] = useState('');
   const [text, setText] = useState('Loading...');
-  const { setIsAuthorized } = useContext(UserContext);
+  const { Login } = useContext(UserContext);
   const { makeRequest, error } = useFetch();
   const navigate = useNavigate();
   let [searchParams] = useSearchParams();
@@ -30,8 +30,8 @@ export default function OAuth2() {
           },
         },
         res => {
-          if (res.data.data) {
-            setIsAuthorized(true);
+          if (res.data.data.user) {
+            Login(res.data.data.user);
             setText('Redirecting...');
             navigate('/');
           }

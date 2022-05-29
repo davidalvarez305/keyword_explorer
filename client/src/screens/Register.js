@@ -7,17 +7,19 @@ import {
   useColorModeValue,
 } from '@chakra-ui/react';
 import useFetch from '../hooks/useFetch';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { REGISTER_ROUTE } from '../constants';
 import RegisterForm from '../forms/RegisterForm';
-import { useNavigate } from 'react-router';
 import LoginOrRegister from '../components/LoginOrRegister';
 import { Formik } from 'formik';
+import { UserContext } from '../context/UserContext';
+import useLoginRequired from '../hooks/useLoginRequired';
 
 export default function Register() {
-  const navigate = useNavigate();
+  const { Login } = useContext(UserContext);
   const { isLoading, makeRequest } = useFetch();
   const [registerError, setRegisterError] = useState({ message: '' });
+  useLoginRequired();
   return (
     <Flex minH={'100vh'} align={'top'} justify={'center'}>
       <Stack spacing={8} mx={'auto'} minW={'80vh'} py={12} px={6}>
@@ -58,7 +60,7 @@ export default function Register() {
                     setRegisterError({ message: data.data.data.error });
                   }
                   if (data.data.data.user) {
-                    navigate('/authorize');
+                    Login(data.data.data.user);
                   }
                 }
               );

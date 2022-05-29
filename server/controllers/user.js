@@ -1,6 +1,6 @@
 import express from "express";
 const router = express.Router();
-import { Get, Login, Logout, Register, Me } from "../handlers/user.js";
+import { Get, Login, Logout, Register, Me, Update } from "../handlers/user.js";
 import authRequired from "../middleware/authRequired.js";
 import restrictedUsers from "../middleware/restrictedUsers.js";
 
@@ -18,5 +18,8 @@ router.post("/logout", authRequired, Logout);
 
 // GET One User
 router.get("/:username", authRequired, Get);
+
+// Update User Credentials
+router.put("/update", authRequired, Update);
 
 export default router;

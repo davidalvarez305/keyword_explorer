@@ -37,7 +37,7 @@ export const LoginUser = async (body) => {
           const valid = await argon2.verify(user.password, body.password);
           if (valid) {
             resolve({
-              user: user,
+              user,
             });
           } else {
             resolve({
@@ -140,5 +140,23 @@ export const findUserById = async (id) => {
         console.error(err);
         reject(err.message);
       });
+  });
+};
+
+export const UpdateUserCredentials = async (input) => {
+  const { id, ...fields } = input;
+  return new Promise(async (resolve, reject) => {
+    try {
+      const u = await User.findOneBy({ id });
+      u.semrush_api_key = fields.semrush_api_key;
+      u.serp_api_key = fields.serp_api_key;
+      User.save(u)
+        .then((user) => {
+          resolve({ user });
+        })
+        .catch(reject);
+    } catch (err) {
+      reject(err);
+    }
   });
 };

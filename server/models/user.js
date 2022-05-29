@@ -34,5 +34,15 @@ export const UserColumns = new EntitySchema({
       nullable: true,
       default: null,
     },
+    semrush_api_key: {
+      type: "varchar",
+      nullable: true,
+      default: null,
+    },
+    serp_api_key: {
+      type: "varchar",
+      nullable: true,
+      default: null,
+    },
   },
 });

@@ -58,13 +58,16 @@ export const GetAccessToken = async (req) => {
         User.findOneBy({ id: req.session.userId })
           .then(async (u) => {
             u.refresh_token = data.data.refresh_token;
-            await User.save(u);
+            await User.save(u)
+              .then((user) => {
+                resolve(user);
+              })
+              .catch(reject);
           })
           .catch((err) => {
             console.error("Failed to persist refresh token to user database.");
             reject({ message: err });
           });
-        resolve(data.data);
       })
       .catch((e) => {
         if (__prod__) {

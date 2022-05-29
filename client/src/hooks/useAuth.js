@@ -4,11 +4,19 @@ import useFetch from './useFetch';
 
 export default function useAuth() {
   const { makeRequest } = useFetch();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [isAuthorized, setIsAuthorized] = useState(false);
+  let userProps = {
+    id: null,
+    username: '',
+    password: '',
+    email: '',
+    refresh_token: null,
+    semrush_api_key: null,
+    serp_api_key: null,
+  };
+  const [user, setUser] = useState(userProps);
 
-  function Login(loggedIn) {
-    setIsLoggedIn(loggedIn);
+  function Login(user) {
+    setUser(user);
   }
 
   function Logout() {
@@ -19,7 +27,7 @@ export default function useAuth() {
       },
       res => {
         if (res.data.data === 'Logged out!') {
-          setIsLoggedIn(false);
+          setUser(userProps);
         }
       }
     );
@@ -33,14 +41,11 @@ export default function useAuth() {
       },
       res => {
         if (res.data.data.user) {
-          setIsLoggedIn(true);
-        }
-        if (res.data.data.user && res.data.data.user.token) {
-          setIsAuthorized(true);
+          setUser(res.data.data.user);
         }
       }
     );
   }, []);
 
-  return { isAuthorized, isLoggedIn, Login, Logout, setIsAuthorized };
+  return { Login, Logout, user };
 }
