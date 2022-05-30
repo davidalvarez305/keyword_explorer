@@ -36,10 +36,8 @@ export const GetKeywordsFromURL = async (req, res) => {
 };
 
 export const PeopleAlsoAskByKeywords = async (req, res) => {
-  if (!req.query.keywords) {
-    return res
-      .status(400)
-      .json({ data: "Please include a keyword in the request." });
+  if (!req.query.keywords || !req.session.serp_api_key) {
+    return res.status(400).json({ data: "Bad request." });
   }
   const searchTerms = req.query.keywords.split("\n");
 
@@ -55,10 +53,8 @@ export const PeopleAlsoAskByKeywords = async (req, res) => {
 };
 
 export const PeopleAlsoAskByURL = async (req, res) => {
-  if (!req.query.pages) {
-    return res
-      .status(400)
-      .json({ data: "Please include pages in the request." });
+  if (!req.query.pages || !req.session.serp_api_key) {
+    return res.status(400).json({ data: "Bad request." });
   }
   const pages = req.query.pages.split("\n");
 
@@ -79,9 +75,7 @@ export const PeopleAlsoAskByURL = async (req, res) => {
 
 export const StrikingDistance = async (req, res) => {
   if (!req.query.pages) {
-    return res
-      .status(400)
-      .json({ data: "Please include pages in your request." });
+    return res.status(400).json({ data: "Bad request." });
   }
 
   const { pages, startDate, endDate } = req.query;
@@ -101,9 +95,7 @@ export const StrikingDistance = async (req, res) => {
 
 export const KeywordPositionsByURL = async (req, res) => {
   if (!req.body.pages) {
-    return res
-      .status(400)
-      .json({ data: "Please include a site in your request." });
+    return res.status(400).json({ data: "Bad request." });
   }
 
   const { pages, startDate, endDate } = req.body;
@@ -122,10 +114,8 @@ export const KeywordPositionsByURL = async (req, res) => {
 };
 
 export const SEMRushKeywords = async (req, res) => {
-  if (!req.query.page) {
-    return res
-      .status(400)
-      .json({ data: "Please include a page in your request." });
+  if (!req.query.page || !req.session.semrush_api_key) {
+    return res.status(400).json({ data: "Bad request." });
   }
 
   GetSEMRushKeywords(req.query.page, req.session.semrush_api_key)
@@ -138,10 +128,8 @@ export const SEMRushKeywords = async (req, res) => {
 };
 
 export const SEMRushBacklinksReport = async (req, res) => {
-  if (!req.query.page) {
-    return res
-      .status(400)
-      .json({ data: "Please include a page in your request." });
+  if (!req.query.page || !req.session.semrush_api_key) {
+    return res.status(400).json({ data: "Bad request." });
   }
 
   const { page, startDate, endDate } = req.query;
@@ -164,10 +152,12 @@ export const SEMRushBacklinksReport = async (req, res) => {
 };
 
 export const FeaturedSnippetsByKeyword = async (req, res) => {
-  if (!req.query.keywords) {
-    return res
-      .status(400)
-      .json({ data: "Please include keywords in your request." });
+  if (
+    !req.query.keywords ||
+    !req.session.serp_api_key ||
+    !req.session.semrush_api_key
+  ) {
+    return res.status(400).json({ data: "Bad request." });
   }
   try {
     const { serp_api_key, semrush_api_key } = req.session;
@@ -183,10 +173,12 @@ export const FeaturedSnippetsByKeyword = async (req, res) => {
 };
 
 export const SERPVideosByKeyword = async (req, res) => {
-  if ((!req.query.keywords, req.session.serp_api_key)) {
-    return res
-      .status(400)
-      .json({ data: "Please include keywords in your request." });
+  if (
+    !req.query.keyword ||
+    !req.session.serp_api_key ||
+    !req.session.semrush_api_key
+  ) {
+    return res.status(400).json({ data: "Bad request." });
   }
   try {
     const { serp_api_key, semrush_api_key } = req.session;
@@ -202,6 +194,13 @@ export const SERPVideosByKeyword = async (req, res) => {
 };
 
 export const GeneratePageReport = async (req, res) => {
+  if (
+    !req.query.page ||
+    !req.session.serp_api_key ||
+    !req.session.semrush_api_key
+  ) {
+    return res.status(400).json({ data: "Bad request." });
+  }
   const { page, startDate, endDate } = req.query;
   const { access_token, semrush_api_key, serp_api_key } = req.session;
   const reqConfig = {

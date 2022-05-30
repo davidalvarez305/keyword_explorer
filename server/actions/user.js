@@ -143,6 +143,21 @@ export const findUserById = async (id) => {
   });
 };
 
+export const GetAPIKeys = async (id) => {
+  return new Promise((resolve, reject) => {
+    try {
+      User.findOneBy({ id }).then(({ serp_api_key, semrush_api_key }) => {
+        resolve({
+          serp_api_key,
+          semrush_api_key,
+        });
+      });
+    } catch (err) {
+      reject(err);
+    }
+  });
+};
+
 export const UpdateUserCredentials = async (input) => {
   const { id, ...fields } = input;
   return new Promise(async (resolve, reject) => {
