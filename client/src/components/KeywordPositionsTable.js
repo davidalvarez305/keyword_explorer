@@ -32,9 +32,7 @@ export default function KeywordPositionsTable({
   const [sortDirection, setSortDirection] = useState(false);
   const { values, handleChange } = useFormHook({ filter: '' });
   const [startIndex, setStartIndex] = useState(0);
-  const [slicedData, setSlicedData] = useState([
-    ...filteredValues.slice(startIndex, startIndex + 100),
-  ]);
+  const [slicedData, setSlicedData] = useState([]);
   const [hasMore, setHasMore] = useState(() => slicedData.length > 0);
   const [toggleDownload, setToggleDownload] = useState(false);
   const pages = extractPages(filteredValues);
@@ -76,10 +74,11 @@ export default function KeywordPositionsTable({
   }, [startIndex]);
 
   useEffect(() => {
-    setFilteredValues([...filterValues(keywordPositions, values.filter)]);
+    const filteredVals = filterValues(keywordPositions, values.filter);
+    setFilteredValues(filteredVals);
     setStartIndex(0);
     setSlicedData(() => {
-      return [...filteredValues.slice(startIndex, startIndex + 100)];
+      return filteredValues.slice(startIndex, startIndex + 100);
     });
   }, [values.filter, sortDirection]);
 
