@@ -94,6 +94,8 @@ export const Update = async (req, res) => {
   if (req.session.userId) {
     try {
       const input = { id: req.session.userId, ...req.body };
+      req.session.semrush_api_key = req.body.semrush_api_key
+      req.session.serp_api_key = req.body.serp_api_key
       const u = await UpdateUserCredentials(input);
       return res.status(201).json({ data: u });
     } catch (err) {

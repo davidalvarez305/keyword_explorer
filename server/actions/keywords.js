@@ -160,7 +160,7 @@ export const GetStrikingDistanceTerms = async (pages, reqConfig) => {
   });
 };
 
-export const CrawlGoogleSERP = async (keyword) => {
+export const CrawlGoogleSERP = async (keyword, serp_api_key) => {
   return new Promise((resolve, reject) => {
     const SERP = process.env.SERP_API;
     axios({
@@ -170,7 +170,7 @@ export const CrawlGoogleSERP = async (keyword) => {
       params: {
         q: keyword,
         engine: "google",
-        api_key: process.env.SERP_API_KEY,
+        api_key: serp_api_key,
         device: "mobile",
       },
     })
@@ -219,7 +219,10 @@ export const GetPAAFromURL = async (body, access_token) => {
   });
 };
 
-export const GetBacklinksReport = async (strikingDistanceKeywords) => {
+export const GetBacklinksReport = async (
+  strikingDistanceKeywords,
+  semrush_api_key
+) => {
   return new Promise(async (resolve, reject) => {
     let rankingDomains = [];
     try {
@@ -231,7 +234,7 @@ export const GetBacklinksReport = async (strikingDistanceKeywords) => {
             method: "GET",
             params: {
               type: "phrase_organic",
-              key: process.env.SEMRUSH_API_KEY,
+              key: semrush_api_key,
               phrase: strikingDistanceKeywords[i],
               database: "us",
               display_limit: 10,
@@ -250,7 +253,10 @@ export const GetBacklinksReport = async (strikingDistanceKeywords) => {
         }
       }
       const top5Pages = getTopDomainsFromList(rankingDomains).slice(0, 5);
-      const batchComparison = await GetBatchComparison(top5Pages);
+      const batchComparison = await GetBatchComparison(
+        top5Pages,
+        semrush_api_key
+      );
       console.log(`Resolving batch comparison...`);
       resolve(batchComparison);
     } catch (err) {
@@ -260,11 +266,11 @@ export const GetBacklinksReport = async (strikingDistanceKeywords) => {
   });
 };
 
-export const GetBatchComparison = async (targets) => {
+export const GetBatchComparison = async (targets, semrush_api_key) => {
   return new Promise((resolve, reject) => {
     let params = {
       type: "backlinks_comparison",
-      key: process.env.SEMRUSH_API_KEY,
+      key: semrush_api_key,
       targets: targets,
       target_types: [],
       export_columns: "target,target_type,ascore,backlinks_num,domains_num",
@@ -285,7 +291,7 @@ export const GetBatchComparison = async (targets) => {
       .then(async ({ data }) => {
         let results = [];
         const original = transformBatchComparisonData(data);
-        const final = await GetDomainAnchorsReport(original);
+        const final = await GetDomainAnchorsReport(original, semrush_api_key);
         for (let i = 0; i < original.length; i++) {
           original[i] = { ...original[i], ...final[i] };
           results.push(original[i]);
@@ -296,7 +302,7 @@ export const GetBatchComparison = async (targets) => {
   });
 };
 
-export const GetDomainAnchorsReport = async (urls) => {
+export const GetDomainAnchorsReport = async (urls, semrush_api_key) => {
   return new Promise(async (resolve, reject) => {
     let reportPerDomain = [];
 
@@ -304,7 +310,7 @@ export const GetDomainAnchorsReport = async (urls) => {
       for (let i = 0; i < urls.length; i++) {
         let params = {
           type: "backlinks",
-          key: process.env.SEMRUSH_API_KEY,
+          key: semrush_api_key,
           target: urls[i]["Target"],
           target_type: urls[i]["Target Type"],
           export_columns: "page_ascore,anchor,external_num,internal_num",
@@ -330,7 +336,7 @@ export const GetDomainAnchorsReport = async (urls) => {
       for (let i = 0; i < urls.length; i++) {
         let params = {
           type: "backlinks_refdomains",
-          key: process.env.SEMRUSH_API_KEY,
+          key: semrush_api_key,
           target: urls[i]["Target"],
           target_type: urls[i]["Target Type"],
           export_columns: "domain_ascore",
@@ -363,12 +369,12 @@ export const GetDomainAnchorsReport = async (urls) => {
   });
 };
 
-export const GetKeywordMSV = async (keyword) => {
+export const GetKeywordMSV = async (keyword, semrush_api_key) => {
   return new Promise(async (resolve, reject) => {
     try {
       let params = {
         type: "phrase_these",
-        key: process.env.SEMRUSH_API_KEY,
+        key: semrush_api_key,
         phrase: keyword,
         database: "us",
         export_columns: "Ph,Nq",
@@ -390,12 +396,15 @@ export const GetKeywordMSV = async (keyword) => {
   });
 };
 
-export const GetPeopleAlsoAskQuestionsByKeywords = async (searchTerms) => {
+export const GetPeopleAlsoAskQuestionsByKeywords = async (
+  searchTerms,
+  serp_api_key
+) => {
   return new Promise(async (resolve, reject) => {
     let peopleAlsoAskQuestions = [];
     for (let i = 0; i < searchTerms.length; i++) {
       try {
-        const questions = await CrawlGoogleSERP(searchTerms[i]);
+        const questions = await CrawlGoogleSERP(searchTerms[i], serp_api_key);
         const peopleAlsoAsk = await extractQuestions(
           questions.related_questions
         );
@@ -408,7 +417,11 @@ export const GetPeopleAlsoAskQuestionsByKeywords = async (searchTerms) => {
   });
 };
 
-export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
+export const GetPeopleAlsoAskQuestionsByURL = async (
+  pages,
+  reqConfig,
+  serp_api_key
+) => {
   const pageList = pages.split("\n");
   return new Promise(async (resolve, reject) => {
     let strikingDistanceKeywords = [];
@@ -438,7 +451,10 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
     let peopleAlsoAskQuestions = [];
     for (let i = 0; i < strikingDistanceKeywords.length; i++) {
       try {
-        const questions = await CrawlGoogleSERP(strikingDistanceKeywords[i]);
+        const questions = await CrawlGoogleSERP(
+          strikingDistanceKeywords[i],
+          serp_api_key
+        );
         if (questions.related_questions) {
           const peopleAlsoAsk = await extractQuestions(
             questions.related_questions
@@ -458,15 +474,15 @@ export const GetPeopleAlsoAskQuestionsByURL = async (pages, reqConfig) => {
   });
 };
 
-export const GetSEMRushKeywords = (page, quantity) => {
+export const GetSEMRushKeywords = (page, semrush_api_key) => {
   return new Promise((resolve, reject) => {
     const url = `https://api.semrush.com/`;
     const params = {
       type: "url_organic",
-      key: process.env.SEMRUSH_API_KEY,
+      key: semrush_api_key,
       url: page,
       database: "us",
-      display_limit: quantity,
+      display_limit: 500,
     };
 
     axios(
@@ -485,17 +501,21 @@ export const GetSEMRushKeywords = (page, quantity) => {
   });
 };
 
-export const GetFeaturedSnippetsByKeyword = async (keywords) => {
+export const GetFeaturedSnippetsByKeyword = async (
+  keywords,
+  serp_api_key,
+  semrush_api_key
+) => {
   const keywordList = keywords.split("\n");
   return new Promise(async (resolve, reject) => {
     let featuredSnippets = [];
     try {
       for (let i = 0; i < keywordList.length; i++) {
         let obj = {};
-        const serp = await CrawlGoogleSERP(keywordList[i]);
+        const serp = await CrawlGoogleSERP(keywordList[i], serp_api_key);
         if (serp.answer_box) {
           obj["Keyword"] = keywordList[i];
-          obj["MSV"] = await GetKeywordMSV(keywordList[i]);
+          obj["MSV"] = await GetKeywordMSV(keywordList[i], semrush_api_key);
           obj["URL That Owns It"] = serp.answer_box.link;
           obj["Ranking Text"] = serp.answer_box.snippet;
           console.log(`Returning featured snippets for ${keywordList[i]}.`);
@@ -513,19 +533,23 @@ export const GetFeaturedSnippetsByKeyword = async (keywords) => {
   });
 };
 
-export const GetSERPVideosByKeyword = (keywords) => {
+export const GetSERPVideosByKeyword = (
+  keywords,
+  serp_api_key,
+  semrush_api_key
+) => {
   return new Promise(async (resolve, reject) => {
     const keywordsList = keywords.split("\n");
 
     let videoSnippets = [];
     try {
       for (let i = 0; i < keywordsList.length; i++) {
-        const serp = await CrawlGoogleSERP(keywordsList[i]);
+        const serp = await CrawlGoogleSERP(keywordsList[i], serp_api_key);
         for (let j = 0; j < serp.organic_results.length; j++) {
           if (serp.organic_results[j].link.includes("youtube.com")) {
             let obj = {};
             obj["Keyword"] = keywordsList[i];
-            obj["MSV"] = await GetKeywordMSV(keywordsList[i]);
+            obj["MSV"] = await GetKeywordMSV(keywordsList[i], semrush_api_key);
             obj["URL That Owns It"] = serp.organic_results[j].link;
             obj["Title"] = serp.organic_results[j].title;
             console.log(`Returning videos for ${keywordsList[i]}.`);
@@ -544,7 +568,12 @@ export const GetSERPVideosByKeyword = (keywords) => {
   });
 };
 
-export const GenerateWorkbook = async (page, reqConfig) => {
+export const GenerateWorkbook = async (
+  page,
+  reqConfig,
+  semrush_api_key,
+  serp_api_key
+) => {
   // Striking Distance Keywords
   console.log("Getting striking distance keywords...");
   const strikingDistanceKeywords = await GetStrikingDistanceTerms(
@@ -553,7 +582,7 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   );
 
   // Universal Results
-  const data = await GetKeywordPositionsByURL(page, reqConfig);
+  const data = await GetSEMRushKeywords(page, semrush_api_key);
   const universalResults = xlsx.utils.json_to_sheet(data);
   const workbook = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(workbook, universalResults, "Universal Results");
@@ -561,7 +590,11 @@ export const GenerateWorkbook = async (page, reqConfig) => {
 
   // SERP Features
   const { featuredSnippets, videoSnippets, peopleAlsoAsk } =
-    await GetSERPSnippetsAndVideos(strikingDistanceKeywords.join("\n"));
+    await GetSERPSnippetsAndVideos(
+      strikingDistanceKeywords.join("\n"),
+      serp_api_key,
+      semrush_api_key
+    );
 
   // PAA
   const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
@@ -579,7 +612,10 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   console.log("Finished Video...");
 
   // Competitor Backlinks
-  const backlinks = await GetBacklinksReport(strikingDistanceKeywords);
+  const backlinks = await GetBacklinksReport(
+    strikingDistanceKeywords,
+    semrush_api_key
+  );
   const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
   xlsx.utils.book_append_sheet(
     workbook,
@@ -600,7 +636,11 @@ export const GenerateWorkbook = async (page, reqConfig) => {
   return filePath;
 };
 
-export const GetSERPSnippetsAndVideos = (keywords) => {
+export const GetSERPSnippetsAndVideos = (
+  keywords,
+  serp_api_key,
+  semrush_api_key
+) => {
   const keywordList = keywords.split("\n");
   return new Promise(async (resolve, reject) => {
     let featuredSnippets = [];
@@ -609,8 +649,11 @@ export const GetSERPSnippetsAndVideos = (keywords) => {
     try {
       for (let i = 0; i < keywordList.length; i++) {
         let obj = {};
-        const serp = await CrawlGoogleSERP(keywordList[i]);
-        const keywordSearchVolume = await GetKeywordMSV(keywordList[i]);
+        const serp = await CrawlGoogleSERP(keywordList[i], serp_api_key);
+        const keywordSearchVolume = await GetKeywordMSV(
+          keywordList[i],
+          semrush_api_key
+        );
         if (serp.answer_box) {
           obj["Keyword"] = keywordList[i];
           obj["MSV"] = keywordSearchVolume;

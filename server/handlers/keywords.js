@@ -44,7 +44,10 @@ export const PeopleAlsoAskByKeywords = async (req, res) => {
   const searchTerms = req.query.keywords.split("\n");
 
   try {
-    const data = await GetPeopleAlsoAskQuestionsByKeywords(searchTerms);
+    const data = await GetPeopleAlsoAskQuestionsByKeywords(
+      searchTerms,
+      req.session.serp_api_key
+    );
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -59,8 +62,15 @@ export const PeopleAlsoAskByURL = async (req, res) => {
   }
   const pages = req.query.pages.split("\n");
 
+  const { startDate, endDate } = req.query;
+  const { access_token, serp_api_key } = req.session;
+
   try {
-    const data = await GetPeopleAlsoAskQuestionsByURL(pages);
+    const data = await GetPeopleAlsoAskQuestionsByURL(
+      pages,
+      { access_token, startDate, endDate },
+      serp_api_key
+    );
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -118,7 +128,7 @@ export const SEMRushKeywords = async (req, res) => {
       .json({ data: "Please include a page in your request." });
   }
 
-  GetSEMRushKeywords(req.query.page)
+  GetSEMRushKeywords(req.query.page, req.session.semrush_api_key)
     .then((data) => {
       return res.status(200).json({ data });
     })
@@ -135,7 +145,7 @@ export const SEMRushBacklinksReport = async (req, res) => {
   }
 
   const { page, startDate, endDate } = req.query;
-  const { access_token } = req.session;
+  const { access_token, semrush_api_key } = req.session;
 
   try {
     const strikingDistanceKeywords = await GetStrikingDistanceTerms(page, {
@@ -143,7 +153,10 @@ export const SEMRushBacklinksReport = async (req, res) => {
       startDate,
       endDate,
     });
-    const data = await GetBacklinksReport(strikingDistanceKeywords);
+    const data = await GetBacklinksReport(
+      strikingDistanceKeywords,
+      semrush_api_key
+    );
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -157,7 +170,12 @@ export const FeaturedSnippetsByKeyword = async (req, res) => {
       .json({ data: "Please include keywords in your request." });
   }
   try {
-    const data = await GetFeaturedSnippetsByKeyword(req.query.keywords);
+    const { serp_api_key, semrush_api_key } = req.session;
+    const data = await GetFeaturedSnippetsByKeyword(
+      req.query.keywords,
+      serp_api_key,
+      semrush_api_key
+    );
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -165,13 +183,18 @@ export const FeaturedSnippetsByKeyword = async (req, res) => {
 };
 
 export const SERPVideosByKeyword = async (req, res) => {
-  if (!req.query.keywords) {
+  if ((!req.query.keywords, req.session.serp_api_key)) {
     return res
       .status(400)
       .json({ data: "Please include keywords in your request." });
   }
   try {
-    const data = await GetSERPVideosByKeyword(req.query.keywords);
+    const { serp_api_key, semrush_api_key } = req.session;
+    const data = await GetSERPVideosByKeyword(
+      req.query.keywords,
+      serp_api_key,
+      semrush_api_key
+    );
     return res.status(200).json({ data });
   } catch (err) {
     return res.status(400).json({ data: err.message });
@@ -180,7 +203,7 @@ export const SERPVideosByKeyword = async (req, res) => {
 
 export const GeneratePageReport = async (req, res) => {
   const { page, startDate, endDate } = req.query;
-  const { access_token } = req.session;
+  const { access_token, semrush_api_key, serp_api_key } = req.session;
   const reqConfig = {
     access_token,
     startDate,
@@ -188,7 +211,12 @@ export const GeneratePageReport = async (req, res) => {
   };
 
   try {
-    const path = await GenerateWorkbook(page, reqConfig);
+    const path = await GenerateWorkbook(
+      page,
+      reqConfig,
+      semrush_api_key,
+      serp_api_key
+    );
     return res.sendFile(path, (error) => {
       if (error) {
         return res.status(400).json({ data: error.message });
