@@ -57,6 +57,22 @@ export const removeDuplicatesAndAppendKeywords = (rows, page) => {
   return keywords;
 };
 
+function extractSEMRushData(data) {
+  let rows = [];
+  let arr = data.split("\r\n");
+  let headers = arr[0].split(";");
+  for (let i = 1; i < arr.length - 1; i++) {
+    let row = arr[i].split(";");
+    let transformed = {};
+    for (let n = 0; n < headers.length; n++) {
+      transformed[headers[n]] = row[n];
+    }
+    rows.push(transformed);
+  }
+
+  return rows;
+}
+
 function parseSERPFeatures(serpFeatures) {
   let ftrs = {};
   let features = serpFeatures.split(",");
@@ -79,29 +95,19 @@ function identifyTheme(keyword) {
   return theme;
 }
 
-export const transformSEMRushData = (data) => {
-  let rows = [];
-  let arr = data.split("\r\n");
+export const createSEMRushKeywordsReport = (data) => {
+  const rows = extractSEMRushData(data);
 
-  let headers = arr[0].split(";");
-
-  for (let i = 1; i < arr.length - 1; i++) {
-    let row = arr[i].split(";");
-    let transformed = {};
-    for (let n = 0; n < headers.length; n++) {
-      transformed[headers[n]] = row[n];
-      if (n === 0) {
-        transformed = { ...transformed, ...identifyTheme(row[n]) };
-      }
-      if (n === 9) {
-        transformed = { ...transformed, ...parseSERPFeatures(row[n]) };
-        delete transformed["SERP Features"];
-        delete transformed["Trends"];
-      }
-    }
-    rows.push(transformed);
+  let final = [];
+  for (let i = 0; i < rows.length; i++) {
+    const { ["SERP Features"]: serpFeatures, Trends, ...item } = rows[i];
+    final.push({
+      ...identifyTheme(item.Keyword),
+      ...item,
+      ...parseSERPFeatures(serpFeatures),
+    });
   }
-  return rows;
+  return final;
 };
 
 export const getTopDomainsFromList = (listOfDomains) => {
@@ -191,27 +197,28 @@ function getTopAnchorTexts(anchors) {
 
 export const transformBacklinksAnchorsReport = (urls) => {
   let final = [];
-  let rows = [];
-  let arr = urls.split("\r\n");
-  let headers = arr[0].split(";");
-  for (let i = 1; i < arr.length - 1; i++) {
-    let row = arr[i].split(";");
-    let transformed = {};
-    for (let n = 0; n < headers.length; n++) {
-      transformed[headers[n]] = row[n];
-    }
-    rows.push(transformed);
-  }
+  const rows = extractSEMRushData(urls);
 
   let data = {};
   const topAnchors = getTopAnchorTexts(rows.map((ea) => ea.anchor));
-  const percentages = calculatePercentageOfDA(rows.map((ea) => ea.page_ascore));
   data["Top Anchor Text 1"] = topAnchors[0];
   data["Top Anchor Text 2"] = topAnchors[1];
-  data["% of BL < DA 40"] = (percentages[0] * 100).toFixed(2) + "%";
-  data["% of BL > DA 40"] = (percentages[1] * 100).toFixed(2) + "%";
   final.push(data);
   return final;
+};
+
+export const calculateDomainAuthorityReport = (data) => {
+  let scores = [];
+  const rows = extractSEMRushData(data);
+
+  let results = {};
+  const percentages = calculatePercentageOfDA(
+    rows.map((ea) => ea.domain_ascore)
+  );
+  results["% of BL < DA 40"] = (percentages[0] * 100).toFixed(2) + "%";
+  results["% of BL > DA 40"] = (percentages[1] * 100).toFixed(2) + "%";
+  scores.push(results);
+  return scores;
 };
 
 function isPAAIncluded(arr, key) {
@@ -244,14 +251,5 @@ export const transformSEMRushMSVData = (data) => {
     return { "Search Volume": 0 };
   }
 
-  let transformed = {};
-  let arr = data.split("\r\n");
-  let headers = arr[0].split(";");
-  for (let i = 1; i <= arr.length - 1; i++) {
-    let row = arr[i].split(";");
-    for (let n = 0; n < headers.length; n++) {
-      transformed[headers[n]] = row[n];
-    }
-  }
-  return transformed;
+  return extractSEMRushData(data);
 };

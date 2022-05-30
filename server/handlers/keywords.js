@@ -134,7 +134,7 @@ export const SEMRushBacklinksReport = async (req, res) => {
       .json({ data: "Please include a page in your request." });
   }
 
-  const { page, startDate, endDate } = req.query.page;
+  const { page, startDate, endDate } = req.query;
   const { access_token } = req.session;
 
   try {

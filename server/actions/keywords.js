@@ -2,7 +2,9 @@ import axios from "axios";
 import "dotenv/config";
 import {
   calculateDateDifference,
+  calculateDomainAuthorityReport,
   createPeopleAlsoAskReport,
+  createSEMRushKeywordsReport,
   extractQuestions,
   extractSiteFromPage,
   FilterStrikingDistanceKeywords,
@@ -238,7 +240,7 @@ export const GetBacklinksReport = async (strikingDistanceKeywords) => {
           null
         );
         console.log(
-          `Length of rankingDomains for ${strikingDistanceKeywords[i]}: ${res.data.length}`
+          `Length of Backlinks for ${strikingDistanceKeywords[i]}: ${res.data.length}`
         );
         if (res.data.length > 26) {
           rankingDomains = [
@@ -299,7 +301,6 @@ export const GetDomainAnchorsReport = async (urls) => {
     let reportPerDomain = [];
 
     try {
-      console.log(`Requesting: ${urls.length}`);
       for (let i = 0; i < urls.length; i++) {
         let params = {
           type: "backlinks",
@@ -324,7 +325,38 @@ export const GetDomainAnchorsReport = async (urls) => {
           ...transformBacklinksAnchorsReport(res.data),
         ];
       }
-      resolve(reportPerDomain);
+
+      let domainScoreReport = [];
+      for (let i = 0; i < urls.length; i++) {
+        let params = {
+          type: "backlinks_refdomains",
+          key: process.env.SEMRUSH_API_KEY,
+          target: urls[i]["Target"],
+          target_type: urls[i]["Target Type"],
+          export_columns: "domain_ascore",
+          display_limit: urls[i]["No. of Backlinks"],
+        };
+
+        const res = await axios(
+          `https://api.semrush.com/analytics/v1/`,
+          {
+            method: "GET",
+            params: params,
+          },
+          null
+        );
+
+        domainScoreReport = [
+          ...domainScoreReport,
+          ...calculateDomainAuthorityReport(res.data),
+        ];
+      }
+
+      let finalReport = [];
+      for (let i = 0; i < reportPerDomain.length; i++) {
+        finalReport.push({ ...reportPerDomain[i], ...domainScoreReport[i] });
+      }
+      resolve(finalReport);
     } catch (err) {
       reject(err);
     }
@@ -350,7 +382,7 @@ export const GetKeywordMSV = async (keyword) => {
         },
         null
       );
-      const msv = transformSEMRushMSVData(res.data);
+      const msv = transformSEMRushMSVData(res.data)[0];
       resolve(msv["Search Volume"]);
     } catch (err) {
       reject(err);
@@ -446,7 +478,7 @@ export const GetSEMRushKeywords = (page, quantity) => {
       null
     )
       .then((data) => {
-        const rows = transformSEMRushData(data.data);
+        const rows = createSEMRushKeywordsReport(data.data);
         resolve(rows);
       })
       .catch(reject);
