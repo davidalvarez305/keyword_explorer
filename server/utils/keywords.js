@@ -12,13 +12,13 @@ export const FilterStrikingDistanceKeywords = (rows) => {
   return strikingDistance;
 };
 
-export const extractQuestions = async (arr) => {
+export const extractQuestions = async (arr, semrush_api_key) => {
   let cleanedQuestions = [];
 
   for (let i = 0; i < arr.length; i++) {
     let obj = {};
     obj["PAA"] = arr[i].question;
-    obj["MSV"] = await GetKeywordMSV(arr[i].question);
+    obj["MSV"] = await GetKeywordMSV(arr[i].question, semrush_api_key);
     obj["URL That Owns It"] = arr[i].link;
     obj["Ranking Text"] = arr[i].snippet;
     obj["Header"] = arr[i].title;
@@ -61,7 +61,9 @@ function extractSEMRushData(data) {
   let rows = [];
   let arr = data.split("\r\n");
   let headers = arr[0].split(";");
-  for (let i = 1; i < arr.length - 1; i++) {
+  let length = arr.length <= 2 ? arr.length : arr.length - 1;
+
+  for (let i = 1; i < length; i++) {
     let row = arr[i].split(";");
     let transformed = {};
     for (let n = 0; n < headers.length; n++) {
@@ -69,7 +71,6 @@ function extractSEMRushData(data) {
     }
     rows.push(transformed);
   }
-
   return rows;
 }
 
@@ -248,7 +249,7 @@ export const createPeopleAlsoAskReport = (data) => {
 
 export const transformSEMRushMSVData = (data) => {
   if (data.includes("ERROR 50 :: NOTHING FOUND")) {
-    return { "Search Volume": 0 };
+    return [{ "Search Volume": 0 }];
   }
 
   return extractSEMRushData(data);

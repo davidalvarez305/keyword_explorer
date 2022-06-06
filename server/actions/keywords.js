@@ -662,7 +662,7 @@ export const GetSERPSnippetsAndVideos = (
           featuredSnippets.push(obj);
         }
         if (serp.related_questions) {
-          const PAA = await extractQuestions(serp.related_questions);
+          const PAA = await extractQuestions(serp.related_questions, semrush_api_key);
           let data = createPeopleAlsoAskReport(PAA);
           peopleAlsoAsk = [...peopleAlsoAsk, ...data];
         }
@@ -678,11 +678,14 @@ export const GetSERPSnippetsAndVideos = (
         }
       }
     } catch (err) {
-      console.log(`Error fetching SERP Snippets: `, err.message);
+      console.log(`Error fetching SERP Snippets: `, err);
       reject(err);
     }
     console.log(
-      `Successfully extracted ${featuredSnippets.length} Featured Snippets.``Successfully extracted ${videoSnippets.length} Video Snippets.`
+      `Successfully extracted ${featuredSnippets.length} Featured Snippets.`
+    );
+    console.log(
+      `Successfully extracted ${videoSnippets.length} Video Snippets.`
     );
     resolve({
       featuredSnippets,
