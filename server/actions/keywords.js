@@ -648,6 +648,7 @@ export const GetSERPSnippetsAndVideos = (
     let peopleAlsoAsk = [];
     try {
       for (let i = 0; i < keywordList.length; i++) {
+        console.log(`Getting data for Keyword #${i + 1} of ${keywordList.length}: ${keywordList[i]}`)
         let obj = {};
         const serp = await CrawlGoogleSERP(keywordList[i], serp_api_key);
         const keywordSearchVolume = await GetKeywordMSV(
