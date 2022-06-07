@@ -201,6 +201,7 @@ export const GeneratePageReport = async (req, res) => {
   ) {
     return res.status(400).json({ data: "Bad request." });
   }
+
   const { page, startDate, endDate } = req.query;
   const { access_token, semrush_api_key, serp_api_key } = req.session;
   const reqConfig = {

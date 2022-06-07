@@ -5,7 +5,7 @@ export const FilterStrikingDistanceKeywords = (rows) => {
   const sorted = rows.sort((a, b) => b.impressions - a.impressions);
   let strikingDistance = [];
   for (let i = 0; i < sorted.length; i++) {
-    if (sorted[i].position <= 15 && sorted[i].position >= 6 && sorted[i].impressions >= 30) {
+    if (sorted[i].position <= 15 && sorted[i].position >= 6 && sorted[i].impressions >= 10) {
       strikingDistance.push(sorted[i].keys[0]);
     }
   }
@@ -147,7 +147,7 @@ export const transformBatchComparisonData = (domains) => {
   let headers = [
     "Target",
     "Target Type",
-    "Authority Score",
+    "PA Score",
     "No. of Backlinks",
     "No. of Referring Domains",
   ];

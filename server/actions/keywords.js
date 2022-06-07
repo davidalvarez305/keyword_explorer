@@ -625,11 +625,10 @@ export const GenerateWorkbook = async (
   console.log("Finished Competitor Backlinks...");
 
   // Create file in path;
-  const folder = path.resolve("../reports/");
   const pagePath = new URL(page);
   const pathname = pagePath.pathname.split("/");
   const fileName = pathname[pathname.length - 1];
-  const filePath = folder + "/" + `${fileName}.xlsx`;
+  const filePath = path.resolve("reports", `${fileName}.xlsx`)
   console.log(`File path: ${filePath}`);
   xlsx.writeFile(workbook, filePath);
 
