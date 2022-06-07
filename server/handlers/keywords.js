@@ -36,7 +36,7 @@ export const GetKeywordsFromURL = async (req, res) => {
 };
 
 export const PeopleAlsoAskByKeywords = async (req, res) => {
-  if (!req.query.keywords || !req.session.serp_api_key) {
+  if (!req.query.keywords || !req.session.serp_api_key || !req.session.semrush_api_key) {
     return res.status(400).json({ data: "Bad request." });
   }
   const searchTerms = req.query.keywords.split("\n");
@@ -44,7 +44,8 @@ export const PeopleAlsoAskByKeywords = async (req, res) => {
   try {
     const data = await GetPeopleAlsoAskQuestionsByKeywords(
       searchTerms,
-      req.session.serp_api_key
+      req.session.serp_api_key,
+      req.session.semrush_api_key
     );
     return res.status(200).json({ data });
   } catch (err) {
@@ -53,19 +54,20 @@ export const PeopleAlsoAskByKeywords = async (req, res) => {
 };
 
 export const PeopleAlsoAskByURL = async (req, res) => {
-  if (!req.query.pages || !req.session.serp_api_key) {
+  if (!req.query.page || !req.session.serp_api_key || !req.session.semrush_api_key) {
     return res.status(400).json({ data: "Bad request." });
   }
-  const pages = req.query.pages.split("\n");
+  const { page } = req.query;
 
   const { startDate, endDate } = req.query;
-  const { access_token, serp_api_key } = req.session;
+  const { access_token, serp_api_key, semrush_api_key } = req.session;
 
   try {
     const data = await GetPeopleAlsoAskQuestionsByURL(
-      pages,
+      page,
       { access_token, startDate, endDate },
-      serp_api_key
+      serp_api_key,
+      semrush_api_key
     );
     return res.status(200).json({ data });
   } catch (err) {

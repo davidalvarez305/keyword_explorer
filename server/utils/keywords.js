@@ -78,8 +78,9 @@ function parseSERPFeatures(serpFeatures) {
   let ftrs = {};
   let features = serpFeatures.split(",");
   for (let i = 0; i < features.length; i++) {
-    if (SERP_FEATURES[features[i]]) {
-      ftrs[SERP_FEATURES[features[i]]] = true;
+    const featuredSnippet = parseInt(features[i])
+    if (SERP_FEATURES[featuredSnippet]) {
+      ftrs[SERP_FEATURES[featuredSnippet]] = true;
     }
   }
   return ftrs;

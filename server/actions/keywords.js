@@ -398,7 +398,8 @@ export const GetKeywordMSV = async (keyword, semrush_api_key) => {
 
 export const GetPeopleAlsoAskQuestionsByKeywords = async (
   searchTerms,
-  serp_api_key
+  serp_api_key,
+  semrush_api_key
 ) => {
   return new Promise(async (resolve, reject) => {
     let peopleAlsoAskQuestions = [];
@@ -406,7 +407,8 @@ export const GetPeopleAlsoAskQuestionsByKeywords = async (
       try {
         const questions = await CrawlGoogleSERP(searchTerms[i], serp_api_key);
         const peopleAlsoAsk = await extractQuestions(
-          questions.related_questions
+          questions.related_questions,
+          semrush_api_key
         );
         peopleAlsoAskQuestions = [...peopleAlsoAskQuestions, ...peopleAlsoAsk];
       } catch (err) {
@@ -420,7 +422,8 @@ export const GetPeopleAlsoAskQuestionsByKeywords = async (
 export const GetPeopleAlsoAskQuestionsByURL = async (
   pages,
   reqConfig,
-  serp_api_key
+  serp_api_key,
+  semrush_api_key
 ) => {
   const pageList = pages.split("\n");
   return new Promise(async (resolve, reject) => {
@@ -457,7 +460,8 @@ export const GetPeopleAlsoAskQuestionsByURL = async (
         );
         if (questions.related_questions) {
           const peopleAlsoAsk = await extractQuestions(
-            questions.related_questions
+            questions.related_questions,
+            semrush_api_key
           );
           peopleAlsoAskQuestions = [
             ...peopleAlsoAskQuestions,
@@ -628,7 +632,7 @@ export const GenerateWorkbook = async (
   const pagePath = new URL(page);
   const pathname = pagePath.pathname.split("/");
   const fileName = pathname[pathname.length - 1];
-  const filePath = path.resolve("reports", `${fileName}.xlsx`)
+  const filePath = path.resolve("reports", `${fileName}.xlsx`);
   console.log(`File path: ${filePath}`);
   xlsx.writeFile(workbook, filePath);
 
@@ -645,9 +649,14 @@ export const GetSERPSnippetsAndVideos = (
     let featuredSnippets = [];
     let videoSnippets = [];
     let peopleAlsoAsk = [];
+    let relatedQuestions = [];
     try {
       for (let i = 0; i < keywordList.length; i++) {
-        console.log(`Getting data for Keyword #${i + 1} of ${keywordList.length}: ${keywordList[i]}`)
+        console.log(
+          `Getting data for Keyword #${i + 1} of ${keywordList.length}: ${
+            keywordList[i]
+          }`
+        );
         let obj = {};
         const serp = await CrawlGoogleSERP(keywordList[i], serp_api_key);
         const keywordSearchVolume = await GetKeywordMSV(
@@ -662,9 +671,7 @@ export const GetSERPSnippetsAndVideos = (
           featuredSnippets.push(obj);
         }
         if (serp.related_questions) {
-          const PAA = await extractQuestions(serp.related_questions, semrush_api_key);
-          let data = createPeopleAlsoAskReport(PAA);
-          peopleAlsoAsk = [...peopleAlsoAsk, ...data];
+          relatedQuestions = [...relatedQuestions, ...serp.related_questions];
         }
         for (let j = 0; j < serp.organic_results.length; j++) {
           if (serp.organic_results[j].link.includes("youtube.com")) {
@@ -676,6 +683,11 @@ export const GetSERPSnippetsAndVideos = (
             videoSnippets.push(obj);
           }
         }
+      }
+      if (relatedQuestions.length > 0) {
+        const PAA = await extractQuestions(relatedQuestions, semrush_api_key);
+        let data = createPeopleAlsoAskReport(PAA);
+        peopleAlsoAsk = data;
       }
     } catch (err) {
       console.log(`Error fetching SERP Snippets: `, err);
