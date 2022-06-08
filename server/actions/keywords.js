@@ -593,7 +593,14 @@ export const GenerateWorkbook = (
       keywordsToUse = strikingDistanceKeywords;
 
       if (strikingDistanceKeywords.length < 20) {
-        const keywords = await RequestKeywords(reqConfig);
+        const config = {
+          site: extractSiteFromPage(page),
+          page: page,
+          access_token: reqConfig.access_token,
+          startDate: reqConfig.startDate,
+          endDate: reqConfig.endDate,
+        };
+        const keywords = await RequestKeywords(config);
         const top25Keywords = FilterTop25PositionsKeywords(keywords);
         console.log(`Retrieved ${top25Keywords.length} keywords from the top 25 positions.`)
         keywordsToUse = top25Keywords;
