@@ -651,20 +651,20 @@ export const GetSERPSnippetsAndVideos = (
     let peopleAlsoAsk = [];
     let relatedQuestions = [];
     try {
-      for (let i = 0; i < keywordList.length; i++) {
+      await keywordList.map(async (keyword) => {
         console.log(
           `Getting data for Keyword #${i + 1} of ${keywordList.length}: ${
             keywordList[i]
           }`
         );
         let obj = {};
-        const serp = await CrawlGoogleSERP(keywordList[i], serp_api_key);
+        const serp = await CrawlGoogleSERP(keyword, serp_api_key);
         const keywordSearchVolume = await GetKeywordMSV(
-          keywordList[i],
+          keyword,
           semrush_api_key
         );
         if (serp.answer_box) {
-          obj["Keyword"] = keywordList[i];
+          obj["Keyword"] = keyword;
           obj["MSV"] = keywordSearchVolume;
           obj["URL That Owns It"] = serp.answer_box.link;
           obj["Ranking Text"] = serp.answer_box.snippet;
@@ -676,16 +676,17 @@ export const GetSERPSnippetsAndVideos = (
         for (let j = 0; j < serp.organic_results.length; j++) {
           if (serp.organic_results[j].link.includes("youtube.com")) {
             let obj = {};
-            obj["Keyword"] = keywordList[i];
+            obj["Keyword"] = keyword;
             obj["MSV"] = keywordSearchVolume;
             obj["URL That Owns It"] = serp.organic_results[j].link;
             obj["Title"] = serp.organic_results[j].title;
             videoSnippets.push(obj);
           }
         }
-      }
-      if (relatedQuestions.length > 0) {
-        const PAA = await extractQuestions(relatedQuestions, semrush_api_key);
+      });
+      const questions = await Promise.all(relatedQuestions);
+      if (questions.length > 0) {
+        const PAA = await extractQuestions(questions, semrush_api_key);
         let data = createPeopleAlsoAskReport(PAA);
         peopleAlsoAsk = data;
       }
@@ -693,15 +694,15 @@ export const GetSERPSnippetsAndVideos = (
       console.log(`Error fetching SERP Snippets: `, err);
       reject(err);
     }
+    const ftrdSnippets = await Promise.all(featuredSnippets);
+    const vidSnippets = await Promise.all(videoSnippets);
     console.log(
-      `Successfully extracted ${featuredSnippets.length} Featured Snippets.`
+      `Successfully extracted ${ftrdSnippets.length} Featured Snippets.`
     );
-    console.log(
-      `Successfully extracted ${videoSnippets.length} Video Snippets.`
-    );
+    console.log(`Successfully extracted ${vidSnippets.length} Video Snippets.`);
     resolve({
-      featuredSnippets,
-      videoSnippets,
+      featuredSnippets: ftrdSnippets,
+      videoSnippets: vidSnippets,
       peopleAlsoAsk,
     });
   });
