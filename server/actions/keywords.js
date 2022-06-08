@@ -8,6 +8,7 @@ import {
   extractQuestions,
   extractSiteFromPage,
   FilterStrikingDistanceKeywords,
+  FilterTop25PositionsKeywords,
   getTopDomainsFromList,
   removeDuplicatesAndAppendKeywords,
   transformBacklinksAnchorsReport,
@@ -17,6 +18,7 @@ import {
 } from "../utils/keywords.js";
 import xlsx from "xlsx";
 import path from "path";
+import { GetKeywordsFromURL } from "../handlers/keywords.js";
 
 export const QueryGoogleKeywordPlanner = (query, token) => {
   const route = `https://googleads.googleapis.com/v10/customers/${GOOGLE_CUSTOMER_ID}:generateKeywordIdeas`;
@@ -572,71 +574,90 @@ export const GetSERPVideosByKeyword = (
   });
 };
 
-export const GenerateWorkbook = async (
+export const GenerateWorkbook = (
   page,
   reqConfig,
   semrush_api_key,
   serp_api_key
 ) => {
-  // Striking Distance Keywords
-  console.log("Getting striking distance keywords...");
-  const strikingDistanceKeywords = await GetStrikingDistanceTerms(
-    page,
-    reqConfig
-  );
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Striking Distance Keywords
+      console.log("Getting striking distance keywords...");
+      let keywordsToUse = [];
+      const strikingDistanceKeywords = await GetStrikingDistanceTerms(
+        page,
+        reqConfig
+      );
 
-  // Universal Results
-  const data = await GetSEMRushKeywords(page, semrush_api_key);
-  const universalResults = xlsx.utils.json_to_sheet(data);
-  const workbook = xlsx.utils.book_new();
-  xlsx.utils.book_append_sheet(workbook, universalResults, "Universal Results");
-  console.log("Finished Universal Results...");
+      keywordsToUse = strikingDistanceKeywords;
 
-  // SERP Features
-  const { featuredSnippets, videoSnippets, peopleAlsoAsk } =
-    await GetSERPSnippetsAndVideos(
-      strikingDistanceKeywords.join("\n"),
-      serp_api_key,
-      semrush_api_key
-    );
+      if (strikingDistanceKeywords.length < 20) {
+        const keywords = await RequestKeywords(reqConfig);
+        const top25Keywords = FilterTop25PositionsKeywords(keywords);
+        keywordsToUse = top25Keywords;
+      }
 
-  // PAA
-  const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
-  xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
-  console.log("Finished PAA...");
+      // Universal Results
+      const data = await GetSEMRushKeywords(page, semrush_api_key);
+      const universalResults = xlsx.utils.json_to_sheet(data);
+      const workbook = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(
+        workbook,
+        universalResults,
+        "Universal Results"
+      );
+      console.log("Finished Universal Results...");
 
-  // Featured Snippets
-  const ftrdSnippets = xlsx.utils.json_to_sheet(featuredSnippets);
-  xlsx.utils.book_append_sheet(workbook, ftrdSnippets, "Featured Snippets");
-  console.log("Finished Featured Snippets...");
+      // SERP Features
+      const { featuredSnippets, videoSnippets, peopleAlsoAsk } =
+        await GetSERPSnippetsAndVideos(
+          keywordsToUse.join("\n"),
+          serp_api_key,
+          semrush_api_key
+        );
 
-  // Videos
-  const videosTab = xlsx.utils.json_to_sheet(videoSnippets);
-  xlsx.utils.book_append_sheet(workbook, videosTab, "Video");
-  console.log("Finished Video...");
+      // PAA
+      const PAA = xlsx.utils.json_to_sheet(peopleAlsoAsk);
+      xlsx.utils.book_append_sheet(workbook, PAA, "PAA");
+      console.log("Finished PAA...");
 
-  // Competitor Backlinks
-  const backlinks = await GetBacklinksReport(
-    strikingDistanceKeywords,
-    semrush_api_key
-  );
-  const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
-  xlsx.utils.book_append_sheet(
-    workbook,
-    competitorBacklinks,
-    "Competitor Backlinks"
-  );
-  console.log("Finished Competitor Backlinks...");
+      // Featured Snippets
+      const ftrdSnippets = xlsx.utils.json_to_sheet(featuredSnippets);
+      xlsx.utils.book_append_sheet(workbook, ftrdSnippets, "Featured Snippets");
+      console.log("Finished Featured Snippets...");
 
-  // Create file in path;
-  const pagePath = new URL(page);
-  const pathname = pagePath.pathname.split("/");
-  const fileName = pathname[pathname.length - 1];
-  const filePath = path.resolve("reports", `${fileName}.xlsx`);
-  console.log(`File path: ${filePath}`);
-  xlsx.writeFile(workbook, filePath);
+      // Videos
+      const videosTab = xlsx.utils.json_to_sheet(videoSnippets);
+      xlsx.utils.book_append_sheet(workbook, videosTab, "Video");
+      console.log("Finished Video...");
 
-  return filePath;
+      // Competitor Backlinks
+      const backlinks = await GetBacklinksReport(
+        keywordsToUse,
+        semrush_api_key
+      );
+      const competitorBacklinks = xlsx.utils.json_to_sheet(backlinks);
+      xlsx.utils.book_append_sheet(
+        workbook,
+        competitorBacklinks,
+        "Competitor Backlinks"
+      );
+      console.log("Finished Competitor Backlinks...");
+
+      // Create file in path;
+      const pagePath = new URL(page);
+      const pathname = pagePath.pathname.split("/");
+      const fileName = pathname[pathname.length - 1];
+      const filePath = path.resolve("reports", `${fileName}.xlsx`);
+      console.log(`File path: ${filePath}`);
+      xlsx.writeFile(workbook, filePath);
+
+      resolve(filePath);
+    } catch (err) {
+      reject(err);
+    }
+  });
 };
 
 export const GetSERPSnippetsAndVideos = (
@@ -684,8 +705,8 @@ export const GetSERPSnippetsAndVideos = (
           }
         }
       });
-      await Promise.all(data)
-      console.log('Data is settled.')
+      await Promise.all(data);
+      console.log("Data is settled.");
       if (relatedQuestions.length > 0) {
         const PAA = await extractQuestions(relatedQuestions, semrush_api_key);
         let data = createPeopleAlsoAskReport(PAA);

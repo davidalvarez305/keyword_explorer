@@ -12,6 +12,17 @@ export const FilterStrikingDistanceKeywords = (rows) => {
   return strikingDistance;
 };
 
+export const FilterTop25PositionsKeywords = (rows) => {
+  const sorted = rows.sort((a, b) => b.impressions - a.impressions);
+  let keywords = [];
+  for (let i = 0; i < sorted.length; i++) {
+    if (sorted[i].position <= 25 && sorted[i].impressions >= 10) {
+      keywords.push(sorted[i].keys[0]);
+    }
+  }
+  return keywords;
+};
+
 export const extractQuestions = async (arr, semrush_api_key) => {
   let cleanedQuestions = [];
 
