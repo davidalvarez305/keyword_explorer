@@ -651,11 +651,11 @@ export const GetSERPSnippetsAndVideos = (
     let peopleAlsoAsk = [];
     let relatedQuestions = [];
     try {
-      await keywordList.map(async (keyword) => {
+      await keywordList.map(async (index, keyword) => {
         console.log(
-          `Getting data for Keyword #${i + 1} of ${keywordList.length}: ${
-            keywordList[i]
-          }`
+          `Getting data for Keyword #${index + 1} of ${
+            keywordList.length
+          }: ${keyword}`
         );
         let obj = {};
         const serp = await CrawlGoogleSERP(keyword, serp_api_key);
