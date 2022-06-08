@@ -651,7 +651,7 @@ export const GetSERPSnippetsAndVideos = (
     let relatedQuestions = [];
     let peopleAlsoAsk = [];
     try {
-      const data = await keywordList.map(async (index, keyword) => {
+      const data = await keywordList.map(async (keyword, index) => {
         console.log(
           `Getting data for Keyword #${index + 1} of ${
             keywordList.length
