@@ -648,10 +648,10 @@ export const GetSERPSnippetsAndVideos = (
   return new Promise(async (resolve, reject) => {
     let featuredSnippets = [];
     let videoSnippets = [];
-    let peopleAlsoAsk = [];
     let relatedQuestions = [];
+    let peopleAlsoAsk = [];
     try {
-      await keywordList.map(async (index, keyword) => {
+      const data = await keywordList.map(async (index, keyword) => {
         console.log(
           `Getting data for Keyword #${index + 1} of ${
             keywordList.length
@@ -684,9 +684,10 @@ export const GetSERPSnippetsAndVideos = (
           }
         }
       });
-      const questions = await Promise.all(relatedQuestions);
-      if (questions.length > 0) {
-        const PAA = await extractQuestions(questions, semrush_api_key);
+      await Promise.all(data)
+      console.log('Data is settled.')
+      if (relatedQuestions.length > 0) {
+        const PAA = await extractQuestions(relatedQuestions, semrush_api_key);
         let data = createPeopleAlsoAskReport(PAA);
         peopleAlsoAsk = data;
       }
@@ -694,15 +695,15 @@ export const GetSERPSnippetsAndVideos = (
       console.log(`Error fetching SERP Snippets: `, err);
       reject(err);
     }
-    const ftrdSnippets = await Promise.all(featuredSnippets);
-    const vidSnippets = await Promise.all(videoSnippets);
     console.log(
-      `Successfully extracted ${ftrdSnippets.length} Featured Snippets.`
+      `Successfully extracted ${featuredSnippets.length} Featured Snippets.`
     );
-    console.log(`Successfully extracted ${vidSnippets.length} Video Snippets.`);
+    console.log(
+      `Successfully extracted ${videoSnippets.length} Video Snippets.`
+    );
     resolve({
-      featuredSnippets: ftrdSnippets,
-      videoSnippets: vidSnippets,
+      featuredSnippets,
+      videoSnippets,
       peopleAlsoAsk,
     });
   });
