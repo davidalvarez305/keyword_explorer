@@ -4,32 +4,29 @@ import {
   RefreshGoogleToken,
 } from "../actions/auth.js";
 
-export const RequestAuthToken = (req, res) => {
-  GetAuthToken(req.body.scope)
-    .then((token) => {
-      return res.status(200).json({ data: token });
-    })
-    .catch((err) => {
-      return res.status(500).json({ data: err.message });
-    });
+export const RequestAuthToken = async (req, res) => {
+  try {
+    const data = await GetAuthToken(req.body.scope);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(500).json({ data: err.message });
+  }
 };
 
 export const RequestAccessToken = async (req, res) => {
-  GetAccessToken(req)
-    .then((data) => {
-      return res.status(200).json({ data });
-    })
-    .catch((err) => {
-      return res.status(500).json({ data: err.message });
-    });
+  try {
+    const data = await GetAccessToken(req);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(500).json({ data: err.message });
+  }
 };
 
 export const RefreshToken = async (req, res) => {
-  RefreshGoogleToken(req)
-    .then((data) => {
-      return res.status(200).json({ data });
-    })
-    .catch((err) => {
-      return res.status(500).json({ data: err.message });
-    });
+  try {
+    const data = await RefreshGoogleToken(req);
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(500).json({ data: err.message });
+  }
 };

@@ -6,9 +6,8 @@ import {
   Text,
   useColorModeValue,
 } from '@chakra-ui/react';
-import useFormHook from '../hooks/useFormHook';
 import useFetch from '../hooks/useFetch';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useState } from 'react';
 import LoginForm from '../forms/LoginForm';
 import { LOGIN_ROUTE } from '../constants';
 import { UserContext } from '../context/UserContext';

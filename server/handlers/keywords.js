@@ -36,7 +36,11 @@ export const GetKeywordsFromURL = async (req, res) => {
 };
 
 export const PeopleAlsoAskByKeywords = async (req, res) => {
-  if (!req.query.keywords || !req.session.serp_api_key || !req.session.semrush_api_key) {
+  if (
+    !req.query.keywords ||
+    !req.session.serp_api_key ||
+    !req.session.semrush_api_key
+  ) {
     return res.status(400).json({ data: "Bad request." });
   }
   const searchTerms = req.query.keywords.split("\n");
@@ -54,7 +58,11 @@ export const PeopleAlsoAskByKeywords = async (req, res) => {
 };
 
 export const PeopleAlsoAskByURL = async (req, res) => {
-  if (!req.query.page || !req.session.serp_api_key || !req.session.semrush_api_key) {
+  if (
+    !req.query.page ||
+    !req.session.serp_api_key ||
+    !req.session.semrush_api_key
+  ) {
     return res.status(400).json({ data: "Bad request." });
   }
   const { page } = req.query;
@@ -120,13 +128,15 @@ export const SEMRushKeywords = async (req, res) => {
     return res.status(400).json({ data: "Bad request." });
   }
 
-  GetSEMRushKeywords(req.query.page, req.session.semrush_api_key)
-    .then((data) => {
-      return res.status(200).json({ data });
-    })
-    .catch((err) => {
-      return res.status(400).json({ data: err.message });
-    });
+  try {
+    const data = await GetSEMRushKeywords(
+      req.query.page,
+      req.session.semrush_api_key
+    );
+    return res.status(200).json({ data });
+  } catch (err) {
+    return res.status(400).json({ data: err.message });
+  }
 };
 
 export const SEMRushBacklinksReport = async (req, res) => {

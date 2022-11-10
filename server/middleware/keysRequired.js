@@ -10,7 +10,7 @@ export default async function keysRequired(req, res, next) {
       req.session.semrush_api_key = keys.semrush_api_key;
       req.session.serp_api_key = keys.serp_api_key;
     } catch (err) {
-      return res.status(500).json({ data: err.message });
+      return res.status(400).json({ data: err.message });
     }
   }
   next();

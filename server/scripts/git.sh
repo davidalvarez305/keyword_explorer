@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd
-cd serp_explorer
+cd code/serp_explorer
 git add .
 
 echo What changes did you make?
