@@ -641,7 +641,7 @@ export const GenerateWorkbook = (
       console.log("Finished Video...");
 
       // Competitor Backlinks
-      const backlinks = await GetBacklinksReport(
+      /* const backlinks = await GetBacklinksReport(
         keywordsToUse,
         semrush_api_key
       );
@@ -651,7 +651,7 @@ export const GenerateWorkbook = (
         competitorBacklinks,
         "Competitor Backlinks"
       );
-      console.log("Finished Competitor Backlinks...");
+      console.log("Finished Competitor Backlinks..."); */
 
       // Create file in path;
       const pagePath = new URL(page);
