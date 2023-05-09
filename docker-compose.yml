@@ -16,7 +16,7 @@ services:
     volumes:
       - static_data:/var/lib/postgresql/data/pgdata/
     ports:
-      - "5433:5432"
+      - "5435:5432"
 
 volumes:
   static_data:

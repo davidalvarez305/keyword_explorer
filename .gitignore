@@ -1,4 +1,5 @@
-*/*.sh
-*/*.env
-*/*.conf
-*/*.json
+*.sh
+*.env
+*.conf
+*.json
+prod.env
