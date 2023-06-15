@@ -2,4 +2,5 @@
 *.env
 *.conf
 *.json
+*.sql
 prod.env

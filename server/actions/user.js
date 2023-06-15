@@ -1,5 +1,4 @@
 import typeorm from "typeorm";
-const getConnection = typeorm.getConnection;
 import argon2 from "argon2";
 import { COOKIE_NAME } from "../constants.js";
 import { AppDataSource } from "../database/db.js";
@@ -33,7 +32,6 @@ export const LoginUser = async (body) => {
     User.findOneBy({ username: body.username })
       .then(async (user) => {
         if (user) {
-          console.log(user);
           const valid = await argon2.verify(user.password, body.password);
           if (valid) {
             resolve({
