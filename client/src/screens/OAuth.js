@@ -30,11 +30,9 @@ export default function OAuth2() {
           },
         },
         res => {
-          if (res.data.data.user) {
-            Login(res.data.data.user);
-            setText('Redirecting...');
-            navigate('/');
-          }
+          Login(res.data.data);
+          setText('Redirecting...');
+          navigate('/');
         }
       );
     }
